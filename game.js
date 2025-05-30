@@ -1,4 +1,5 @@
 // Telegram WebApp initialization
+let tg = window.Telegram.WebApp;
 let tg;
 if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
     tg = Telegram.WebApp;
@@ -14,6 +15,26 @@ if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
             colorScheme: 'light'
         } 
     };
+}
+
+function initTelegramWebApp() {
+  if (tg) {
+    tg.expand(); // Развернуть приложение на весь экран
+    tg.enableClosingConfirmation(); // Подтверждение перед закрытием
+    
+    // Установка цвета фона
+    tg.setHeaderColor('#2e7d32');
+    tg.setBackgroundColor('#f5f5f5');
+    
+    // Обработчик события изменения размера
+    tg.onEvent('viewportChanged', updateViewport);
+    updateViewport();
+  }
+}
+
+function updateViewport() {
+  const viewportHeight = tg?.viewportHeight || window.innerHeight;
+  document.documentElement.style.setProperty('--tg-viewport-height', `${viewportHeight}px`);
 }
 
 // Константы игры
@@ -305,6 +326,8 @@ function initGame() {
     renderShop();
     renderAchievements();
     updateGardenSlotsUI();
+    initTelegramWebApp();
+
     elements.rewardModal.style.display = 'none';
     checkTreeHealth();
     
@@ -344,27 +367,14 @@ function addShareButton() {
 
 // Функция "Поделиться"
 function shareGame() {
-    if (tg?.platform !== 'unknown') {
-        tg.showPopup({
-            title: 'Поделиться игрой',
-            message: 'Пригласите друзей играть вместе!',
-            buttons: [{
-                id: 'share',
-                type: 'default',
-                text: 'Поделиться'
-            }]
-        }, (buttonId) => {
-            if (buttonId === 'share') {
-                tg.shareLink(
-                    'https://t.me/your_bot_link',
-                    'Попробуй эту крутую игру с деревьями! 🌳'
-                );
-            }
-        });
-    } else {
-        showNotification("Функция доступна только в Telegram");
-    }
+      if (tg) {
+    tg.shareLink(
+      `https://t.me/${tg.initDataUnsafe.user?.username || 'ECO_THREE_bot'}`,
+      'Присоединяйся к ECO_THREE - выращивай деревья и зарабатывай монеты! 🌳'
+    );
+  }
 }
+
 
 // Настройка обработчиков событий
 function setupEventListeners() {
