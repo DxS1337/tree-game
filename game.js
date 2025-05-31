@@ -327,10 +327,6 @@ function initGame() {
     elements.rewardModal.style.display = 'none';
     checkTreeHealth();
     
-    // Добавляем кнопку "Поделиться" если в Telegram
-    if (tg?.platform !== 'unknown') {
-        addShareButton();
-    }
     
     // Запускаем таймеры
     setInterval(updateChestTimer, 60000);
@@ -349,16 +345,6 @@ function applyTheme() {
     if (elements.themeToggle) {
         elements.themeToggle.checked = isDark;
     }
-}
-
-// Добавление кнопки "Поделиться"
-function addShareButton() {
-    const shareBtn = document.createElement('button');
-    shareBtn.className = 'share-btn';
-    shareBtn.innerHTML = '🔗';
-    shareBtn.title = 'Поделиться игрой';
-    shareBtn.addEventListener('click', shareGame);
-    document.body.appendChild(shareBtn);
 }
 
 // Функция "Поделиться"
