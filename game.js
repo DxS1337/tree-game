@@ -1,40 +1,36 @@
 // Telegram WebApp initialization
 let tg = window.Telegram.WebApp;
-let tg;
-if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-    tg = Telegram.WebApp;
-    tg.expand();
-    tg.enableClosingConfirmation();
-} else {
-    console.warn('Telegram WebApp не обнаружен. Режим совместимости.');
-    tg = { 
-        WebApp: { 
-            platform: 'unknown', 
-            expand: () => {}, 
-            showPopup: () => {},
-            colorScheme: 'light'
-        } 
-    };
-}
 
 function initTelegramWebApp() {
-  if (tg) {
-    tg.expand(); // Развернуть приложение на весь экран
-    tg.enableClosingConfirmation(); // Подтверждение перед закрытием
-    
-    // Установка цвета фона
-    tg.setHeaderColor('#2e7d32');
-    tg.setBackgroundColor('#f5f5f5');
-    
-    // Обработчик события изменения размера
-    tg.onEvent('viewportChanged', updateViewport);
-    updateViewport();
-  }
+    if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+        tg = Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Устанавливаем цвета из Telegram
+        document.documentElement.style.setProperty('--tg-header-color', tg.headerColor);
+        document.documentElement.style.setProperty('--tg-bg-color', tg.backgroundColor);
+        document.documentElement.style.setProperty('--tg-text-color', tg.themeParams.text_color || '#000000');
+        
+        // Обновляем viewport при изменении
+        tg.onEvent('viewportChanged', updateViewport);
+        updateViewport();
+    } else {
+        console.warn('Telegram WebApp не обнаружен. Режим совместимости.');
+        tg = { 
+            WebApp: { 
+                platform: 'unknown', 
+                expand: () => {}, 
+                showPopup: () => {},
+                colorScheme: 'light'
+            } 
+        };
+    }
 }
 
 function updateViewport() {
-  const viewportHeight = tg?.viewportHeight || window.innerHeight;
-  document.documentElement.style.setProperty('--tg-viewport-height', `${viewportHeight}px`);
+    const viewportHeight = tg?.viewportHeight || window.innerHeight;
+    document.documentElement.style.setProperty('--tg-viewport-height', `${viewportHeight}px`);
 }
 
 // Константы игры
@@ -367,14 +363,13 @@ function addShareButton() {
 
 // Функция "Поделиться"
 function shareGame() {
-      if (tg) {
-    tg.shareLink(
-      `https://t.me/${tg.initDataUnsafe.user?.username || 'ECO_THREE_bot'}`,
-      'Присоединяйся к ECO_THREE - выращивай деревья и зарабатывай монеты! 🌳'
-    );
-  }
+    if (tg) {
+        tg.shareLink(
+            `https://t.me/${tg.initDataUnsafe.user?.username || 'ECO_THREE_bot'}`,
+            'Присоединяйся к ECO_THREE - выращивай деревья и зарабатывай монеты! 🌳'
+        );
+    }
 }
-
 
 // Настройка обработчиков событий
 function setupEventListeners() {
@@ -490,6 +485,35 @@ function setupEventListeners() {
         }
         e.preventDefault();
     });
+
+    // Обработка свайпов для 2048 на мобильных устройствах
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    elements.game2048Board?.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    elements.game2048Board?.addEventListener('touchend', function(e) {
+        if (!game2048.isPlaying) return;
+        
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        
+        const dx = touchEndX - touchStartX;
+        const dy = touchEndY - touchStartY;
+        
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 0) game2048.move('right');
+            else game2048.move('left');
+        } else {
+            if (dy > 0) game2048.move('down');
+            else game2048.move('up');
+        }
+    }, { passive: false });
 
     // Закрытие модальных окон
     elements.rewardModal?.querySelector('.close').addEventListener('click', () => {
@@ -1778,7 +1802,7 @@ const game2048 = {
             this.close();
         });
     },
-	
+
     isGameOver() {
         // Проверка пустых клеток
         for (let i = 0; i < 4; i++) {
