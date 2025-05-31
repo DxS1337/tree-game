@@ -2,15 +2,11 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="format-detection" content="telephone=no">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="format-detection" content="telephone=no">
-
     <title>Дерево-Игра</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-	
 </head>
 <body>
     <!-- Админская кнопка -->
@@ -48,23 +44,23 @@
 
     <!-- Сундуки -->
     <div class="chest-container">
-            <div class="chest-menu" id="chest-menu">
-                <div class="chest-option daily-chest" data-type="daily">
-                    <div class="chest-icon">📅</div>
-                    <div class="chest-info">
-                        <div class="chest-name">Ежедневный</div>
-                        <div class="chest-timer" id="daily-timer">Доступно</div>
-                    </div>
+        <div class="chest-menu" id="chest-menu">
+            <div class="chest-option daily-chest" data-type="daily">
+                <div class="chest-icon">📅</div>
+                <div class="chest-info">
+                    <div class="chest-name">Ежедневный</div>
+                    <div class="chest-timer" id="daily-timer">Доступно</div>
                 </div>
-                <div class="chest-option premium-chest" data-type="premium">
-                    <div class="chest-icon">💰</div>
-                    <div class="chest-info">
-                        <div class="chest-name">Премиум</div>
-                        <div class="chest-price">200 <span class="currency">$</span></div>
-                    </div>
+            </div>
+            <div class="chest-option premium-chest" data-type="premium">
+                <div class="chest-icon">💰</div>
+                <div class="chest-info">
+                    <div class="chest-name">Премиум</div>
+                    <div class="chest-price">200 <span class="currency">$</span></div>
                 </div>
             </div>
         </div>
+    </div>
 
     <!-- Основной контент с разделами -->
     <div class="game-app">
@@ -72,10 +68,10 @@
             <!-- Главный экран -->
             <div class="content-section active" id="home-content">
                 <div class="app-header">
-					<h1>🌳 ДЕРЕВО-ИГРА</h1>
-					<div class="chest-menu-btn" id="chest-menu-btn">🎁</div>
-					<div class="app-version">v2.5</div>
-				</div>
+                    <h1>🌳 ДЕРЕВО-ИГРА</h1>
+                    <div class="chest-menu-btn" id="chest-menu-btn">🎁</div>
+                    <div class="app-version">v2.5</div>
+                </div>
                 
                 <!-- Основное дерево -->
                 <div class="tree-display">
@@ -85,10 +81,8 @@
                 </div>
                 
                 <div class="resources-bar">
-                    
                     <div class="resource">
-					
-					<span class="resource-icon">🪙</span>
+                        <span class="resource-icon">🪙</span>
                         <span id="coins">0</span>
                     </div>
                 </div>
@@ -129,12 +123,6 @@
                             <button class="btn btn-small unlock-slot-btn">Разблокировать (1000 монет)</button>
                         </div>
                     </div>
-                </div>
-
-                <!-- Кнопки действий -->
-                <div class="action-buttons">
-                    <button class="btn btn-primary" id="water-btn">💧 Полить</button>
-                    <button class="btn btn-secondary" id="plant-btn">🌱 Посадить</button>
                 </div>
             </div>
             
@@ -209,16 +197,16 @@
                         <input type="text" id="username" maxlength="20">
                     </div>
                     <div class="profile-field">
-							<label>Тема:</label>
-							<div class="theme-switch-container">
-								<span class="theme-icon">☀️</span>
-								<label class="theme-slider">
-									<input type="checkbox" id="theme-toggle">
-									<span class="slider"></span>
-								</label>
-								<span class="theme-icon">🌙</span>
-							</div>
-						</div>
+                        <label>Тема:</label>
+                        <div class="theme-switch-container">
+                            <span class="theme-icon">☀️</span>
+                            <label class="theme-slider">
+                                <input type="checkbox" id="theme-toggle">
+                                <span class="slider"></span>
+                            </label>
+                            <span class="theme-icon">🌙</span>
+                        </div>
+                    </div>
                     <div class="achievements">
                         <h3>🏆 Достижения</h3>
                         <div class="achievement-tabs">
@@ -256,6 +244,12 @@
                 <span class="nav-icon">👤</span>
                 <span class="nav-label">Профиль</span>
             </button>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" id="water-btn">💧 Полить</button>
+            <button class="btn btn-secondary" id="plant-btn">🌱 Посадить</button>
         </div>
     </div>
 
