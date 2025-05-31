@@ -43,7 +43,6 @@ const CONSTANTS = {
     XP_MULTIPLIER: 0.1,
     ENERGY_REGEN_TIME: 10 * 60 * 1000,
     DEFAULT_USERNAME: "Игрок",
-    THEME_MODES: ['auto', 'light', 'dark'],
     GARDEN_SLOT_COST: 1000,
     TREE_DEATH_TIME: 7 * 24 * 60 * 60 * 1000, // 7 дней в мс
     TREE_GROWTH_STAGES: ['🌱', '🌿', '🌳', '🌲'],
@@ -92,7 +91,6 @@ const gameState = {
     },
     profile: {
         username: CONSTANTS.DEFAULT_USERNAME,
-        themeMode: 'auto',
         achievements: []
     },
     upgrades: {
@@ -268,7 +266,6 @@ const elements = {
     skillsNav: document.getElementById('skills-nav'),
     shopNav: document.getElementById('shop-nav'),
     homeNav: document.getElementById('home-nav'),
-    gamepadNav: document.getElementById('gamepad-nav'),
     profileNav: document.getElementById('profile-nav'),
     inventoryPoints: document.getElementById('inventory-points'),
     upgradeExem: document.getElementById('upgrade-exem'),
@@ -303,16 +300,13 @@ const elements = {
     game2048Close: document.getElementById('game-2048-close'),
     tileValueDisplay: document.getElementById('tile-value-display'),
     username: document.getElementById('username'),
-    themeToggle: document.getElementById('theme-toggle'),
     allAchievements: document.getElementById('all-achievements'),
     unlockedAchievements: document.getElementById('unlocked-achievements'),
-    gardenSlots: document.getElementById('garden-slots'),
-    profileBtn: document.getElementById('profile-btn')
+    gardenSlots: document.getElementById('garden-slots')
 };
 
 // Инициализация игры
 function initGame() {
-    applyTheme();
     setupEventListeners();
     loadGame();
     initAchievements();
@@ -327,34 +321,10 @@ function initGame() {
     elements.rewardModal.style.display = 'none';
     checkTreeHealth();
     
-    
     // Запускаем таймеры
     setInterval(updateChestTimer, 60000);
     setInterval(regenerateEnergy, CONSTANTS.ENERGY_REGEN_TIME);
     setInterval(checkTreeHealth, 24 * 60 * 60 * 1000); // Проверка здоровья деревьев раз в день
-}
-
-// Применение темы
-function applyTheme() {
-    const mode = gameState.profile.themeMode;
-    const isDark = mode === 'dark' || (mode === 'auto' && tg?.colorScheme === 'dark');
-    
-    document.body.classList.toggle('dark-theme', isDark);
-    
-    // Обновляем переключатель темы
-    if (elements.themeToggle) {
-        elements.themeToggle.checked = isDark;
-    }
-}
-
-// Функция "Поделиться"
-function shareGame() {
-    if (tg) {
-        tg.shareLink(
-            `https://t.me/${tg.initDataUnsafe.user?.username || 'ECO_THREE_bot'}`,
-            'Присоединяйся к ECO_THREE - выращивай деревья и зарабатывай монеты! 🌳'
-        );
-    }
 }
 
 // Настройка обработчиков событий
@@ -363,17 +333,10 @@ function setupEventListeners() {
     elements.waterBtn?.addEventListener('click', waterTree);
     elements.plantBtn?.addEventListener('click', plantTree);
     
-    elements.themeToggle?.addEventListener('change', function() {
-        gameState.profile.themeMode = this.checked ? 'dark' : 'light';
-        applyTheme();
-        saveGame();
-    });
-    
     // Навигация
     elements.skillsNav?.addEventListener('click', () => showContentSection('skills-content'));
     elements.shopNav?.addEventListener('click', () => showContentSection('shop-content'));
     elements.homeNav?.addEventListener('click', () => showContentSection('home-content'));
-    elements.gamepadNav?.addEventListener('click', () => showContentSection('games-content'));
     elements.profileNav?.addEventListener('click', () => showContentSection('profile-content'));
     
     // Навыки
@@ -529,7 +492,6 @@ function showContentSection(sectionId) {
         'home-content': 'home-nav',
         'shop-content': 'shop-nav',
         'skills-content': 'skills-nav',
-        'games-content': 'gamepad-nav',
         'profile-content': 'profile-nav'
     };
     
@@ -1080,6 +1042,7 @@ function showRoulette(type) {
         `;
         document.body.appendChild(rouletteModal);
         
+        rouletteModal.style.display = 'block';
         setTimeout(() => {
             rouletteModal.classList.add('show');
         }, 10);
@@ -1101,6 +1064,7 @@ function showRoulette(type) {
         const itemCount = 30;
         const targetIndex = 25;
         
+        // Создаем элементы рулетки
         for (let i = 0; i < itemCount; i++) {
             const isTarget = i === targetIndex;
             const currentType = isTarget ? rewardType : types[Math.floor(Math.random() * types.length)];
@@ -1113,11 +1077,13 @@ function showRoulette(type) {
             itemsContainer.appendChild(item);
         }
         
+        // Рассчитываем позицию для остановки
         const containerWidth = rouletteModal.querySelector('.roulette-container').offsetWidth;
-        const itemWidth = 90;
+        const itemWidth = 80;
         const centerOffset = containerWidth / 2 - itemWidth / 2;
         const targetPosition = -(targetIndex * itemWidth) + centerOffset;
         
+        // Запускаем анимацию
         setTimeout(() => {
             itemsContainer.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.35, 1)';
             itemsContainer.style.transform = `translateX(${targetPosition}px)`;
@@ -1373,7 +1339,6 @@ function loadGame() {
                 // Профиль
                 if (parsed.profile) {
                     gameState.profile.username = parsed.profile.username || CONSTANTS.DEFAULT_USERNAME;
-                    gameState.profile.themeMode = parsed.profile.themeMode || 'auto';
                     gameState.profile.achievements = parsed.profile.achievements || [];
                 }
                 
