@@ -8,13 +8,20 @@ function initTelegramWebApp() {
         tg.enableClosingConfirmation();
         
         // Устанавливаем цвета из Telegram
-        document.documentElement.style.setProperty('--tg-header-color', tg.headerColor);
-        document.documentElement.style.setProperty('--tg-bg-color', tg.backgroundColor);
-        document.documentElement.style.setProperty('--tg-text-color', tg.themeParams.text_color || '#000000');
+        document.documentElement.style.setProperty('--tg-header-color', tg.headerColor || '#2e7d32');
+        document.documentElement.style.setProperty('--tg-bg-color', tg.backgroundColor || '#f5f5f5');
+        document.documentElement.style.setProperty('--tg-text-color', tg.themeParams.text_color || '#1b5e20');
         
-        // Обновляем viewport при изменении
-        tg.onEvent('viewportChanged', updateViewport);
+        // Обновляем viewport
         updateViewport();
+        tg.onEvent('viewportChanged', updateViewport);
+        
+        // Предотвращаем сворачивание при свайпе в игре 2048
+        document.addEventListener('touchmove', function(e) {
+            if (game2048.isPlaying && elements.game2048Container && elements.game2048Container.style.display === 'block') {
+                e.preventDefault();
+            }
+        }, { passive: false });
     } else {
         console.warn('Telegram WebApp не обнаружен. Режим совместимости.');
         tg = { 
@@ -30,7 +37,9 @@ function initTelegramWebApp() {
 
 function updateViewport() {
     const viewportHeight = tg?.viewportHeight || window.innerHeight;
+    const viewportWidth = tg?.viewportWidth || window.innerWidth;
     document.documentElement.style.setProperty('--tg-viewport-height', `${viewportHeight}px`);
+    document.documentElement.style.setProperty('--tg-viewport-width', `${viewportWidth}px`);
 }
 
 // Константы игры
@@ -318,7 +327,7 @@ function initGame() {
     updateGardenSlotsUI();
     initTelegramWebApp();
 
-    elements.rewardModal.style.display = 'none';
+    if (elements.rewardModal) elements.rewardModal.style.display = 'none';
     checkTreeHealth();
     
     // Запускаем таймеры
@@ -330,48 +339,48 @@ function initGame() {
 // Настройка обработчиков событий
 function setupEventListeners() {
     // Основные кнопки
-    elements.waterBtn?.addEventListener('click', waterTree);
-    elements.plantBtn?.addEventListener('click', plantTree);
+    if (elements.waterBtn) elements.waterBtn.addEventListener('click', waterTree);
+    if (elements.plantBtn) elements.plantBtn.addEventListener('click', plantTree);
     
     // Навигация
-    elements.skillsNav?.addEventListener('click', () => showContentSection('skills-content'));
-    elements.shopNav?.addEventListener('click', () => showContentSection('shop-content'));
-    elements.homeNav?.addEventListener('click', () => showContentSection('home-content'));
-    elements.profileNav?.addEventListener('click', () => showContentSection('profile-content'));
+    if (elements.skillsNav) elements.skillsNav.addEventListener('click', () => showContentSection('skills-content'));
+    if (elements.shopNav) elements.shopNav.addEventListener('click', () => showContentSection('shop-content'));
+    if (elements.homeNav) elements.homeNav.addEventListener('click', () => showContentSection('home-content'));
+    if (elements.profileNav) elements.profileNav.addEventListener('click', () => showContentSection('profile-content'));
     
     // Навыки
-    elements.upgradeExem?.addEventListener('click', () => upgradeSkill('inventory', 'exemFasterMatch'));
-    elements.upgradeQuickHands?.addEventListener('click', () => upgradeSkill('inventory', 'quickHands'));
-    elements.upgradeOrganized?.addEventListener('click', () => upgradeSkill('inventory', 'organized'));
+    if (elements.upgradeExem) elements.upgradeExem.addEventListener('click', () => upgradeSkill('inventory', 'exemFasterMatch'));
+    if (elements.upgradeQuickHands) elements.upgradeQuickHands.addEventListener('click', () => upgradeSkill('inventory', 'quickHands'));
+    if (elements.upgradeOrganized) elements.upgradeOrganized.addEventListener('click', () => upgradeSkill('inventory', 'organized'));
     
     // Админ-панель
-    elements.adminBtn?.addEventListener('click', (e) => {
+    if (elements.adminBtn) elements.adminBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        elements.adminPanel?.classList.toggle('show');
+        if (elements.adminPanel) elements.adminPanel.classList.toggle('show');
     });
-    elements.resetBtn?.addEventListener('click', resetGame);
-    elements.applyBtn?.addEventListener('click', applyAdminSettings);
-    elements.addBlockBtn?.addEventListener('click', () => {
+    if (elements.resetBtn) elements.resetBtn.addEventListener('click', resetGame);
+    if (elements.applyBtn) elements.applyBtn.addEventListener('click', applyAdminSettings);
+    if (elements.addBlockBtn) elements.addBlockBtn.addEventListener('click', () => {
         if (game2048.isPlaying) {
             game2048.addSpecificTile(2048);
             game2048.updateUI();
         }
     });
-    elements.addTileBtn?.addEventListener('click', () => {
+    if (elements.addTileBtn) elements.addTileBtn.addEventListener('click', () => {
         const value = parseInt(elements.setTileValue?.value) || 2;
         if (game2048.isPlaying) {
             game2048.addSpecificTile(value);
             game2048.updateUI();
         }
     });
-    elements.setTileValue?.addEventListener('input', function() {
-        elements.tileValueDisplay.textContent = this.value;
+    if (elements.setTileValue) elements.setTileValue.addEventListener('input', function() {
+        if (elements.tileValueDisplay) elements.tileValueDisplay.textContent = this.value;
     });
     
     // Сундуки
-    elements.chestMenuBtn?.addEventListener('click', (e) => {
+    if (elements.chestMenuBtn) elements.chestMenuBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        elements.chestMenu?.classList.toggle('show');
+        if (elements.chestMenu) elements.chestMenu.classList.toggle('show');
         updateChestTimer();
     });
     
@@ -379,17 +388,17 @@ function setupEventListeners() {
         option.addEventListener('click', function() {
             if (gameState.openingChest) return;
             openChest(this.dataset.type);
-            elements.chestMenu?.classList.remove('show');
+            if (elements.chestMenu) elements.chestMenu.classList.remove('show');
         });
     });
     
     // Игры
-    elements.game2048Card?.addEventListener('click', () => game2048.start());
-    elements.game2048Restart?.addEventListener('click', () => game2048.start());
-    elements.game2048Close?.addEventListener('click', () => game2048.close());
+    if (elements.game2048Card) elements.game2048Card.addEventListener('click', () => game2048.start());
+    if (elements.game2048Restart) elements.game2048Restart.addEventListener('click', () => game2048.start());
+    if (elements.game2048Close) elements.game2048Close.addEventListener('click', () => game2048.close());
     
     // Профиль
-    elements.username?.addEventListener('change', function() {
+    if (elements.username) elements.username.addEventListener('change', function() {
         gameState.profile.username = this.value || CONSTANTS.DEFAULT_USERNAME;
         saveGame();
     });
@@ -404,19 +413,20 @@ function setupEventListeners() {
                 list.classList.add('hidden');
             });
             
-            document.getElementById(`${this.dataset.tab}-achievements`).classList.remove('hidden');
+            const tabContent = document.getElementById(`${this.dataset.tab}-achievements`);
+            if (tabContent) tabContent.classList.remove('hidden');
         });
     });
 
     // Клик вне модальных окон
     window.addEventListener('click', (event) => {
-        if (!event.target.closest('.admin-panel') && !event.target.closest('.admin-btn')) {
-            elements.adminPanel?.classList.remove('show');
+        if (!event.target.closest('.admin-panel') && !event.target.closest('.admin-btn') && elements.adminPanel) {
+            elements.adminPanel.classList.remove('show');
         }
-        if (!event.target.closest('.chest-menu') && !event.target.closest('.chest-menu-btn')) {
-            elements.chestMenu?.classList.remove('show');
+        if (!event.target.closest('.chest-menu') && !event.target.closest('.chest-menu-btn') && elements.chestMenu) {
+            elements.chestMenu.classList.remove('show');
         }
-        if (!event.target.closest('.reward-modal') && event.target !== elements.rewardModal) {
+        if (!event.target.closest('.reward-modal') && event.target !== elements.rewardModal && elements.rewardModal) {
             elements.rewardModal.style.display = 'none';
         }
     });
@@ -441,36 +451,43 @@ function setupEventListeners() {
     let touchEndX = 0;
     let touchEndY = 0;
 
-    elements.game2048Board?.addEventListener('touchstart', function(e) {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-    }, { passive: true });
+    if (elements.game2048Board) {
+        elements.game2048Board.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
 
-    elements.game2048Board?.addEventListener('touchend', function(e) {
-        if (!game2048.isPlaying) return;
-        
-        touchEndX = e.changedTouches[0].screenX;
-        touchEndY = e.changedTouches[0].screenY;
-        
-        const dx = touchEndX - touchStartX;
-        const dy = touchEndY - touchStartY;
-        
-        if (Math.abs(dx) > Math.abs(dy)) {
-            if (dx > 0) game2048.move('right');
-            else game2048.move('left');
-        } else {
-            if (dy > 0) game2048.move('down');
-            else game2048.move('up');
-        }
-    }, { passive: false });
+        elements.game2048Board.addEventListener('touchend', function(e) {
+            if (!game2048.isPlaying) return;
+            
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            
+            const dx = touchEndX - touchStartX;
+            const dy = touchEndY - touchStartY;
+            
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 0) game2048.move('right');
+                else game2048.move('left');
+            } else {
+                if (dy > 0) game2048.move('down');
+                else game2048.move('up');
+            }
+        }, { passive: false });
+    }
 
     // Закрытие модальных окон
-    elements.rewardModal?.querySelector('.close').addEventListener('click', () => {
-        elements.rewardModal.style.display = 'none';
-    });
-    elements.rewardModal?.querySelector('.btn').addEventListener('click', () => {
-        elements.rewardModal.style.display = 'none';
-    });
+    if (elements.rewardModal) {
+        const closeBtn = elements.rewardModal.querySelector('.close');
+        if (closeBtn) closeBtn.addEventListener('click', () => {
+            elements.rewardModal.style.display = 'none';
+        });
+        
+        const rewardBtn = elements.rewardModal.querySelector('.btn');
+        if (rewardBtn) rewardBtn.addEventListener('click', () => {
+            elements.rewardModal.style.display = 'none';
+        });
+    }
 }
 
 // Показать секцию контента
@@ -711,20 +728,26 @@ function updateGardenSlotsUI() {
                     <button class="btn btn-small select-tree-btn">Выбрать</button>
                 `;
                 
-                slotElement.querySelector('.select-tree-btn').addEventListener('click', () => {
-                    gameState.activeTreeSlot = slotNumber;
-                    updateGardenSlotsUI();
-                    updateUI();
-                    showNotification(`Дерево в слоте ${slotNumber} выбрано для полива`);
-                });
+                const selectBtn = slotElement.querySelector('.select-tree-btn');
+                if (selectBtn) {
+                    selectBtn.addEventListener('click', () => {
+                        gameState.activeTreeSlot = slotNumber;
+                        updateGardenSlotsUI();
+                        updateUI();
+                        showNotification(`Дерево в слоте ${slotNumber} выбрано для полива`);
+                    });
+                }
             } else {
                 slotElement.innerHTML = `
                     <div class="empty-slot">+</div>
                     <button class="btn btn-small plant-slot-btn">Посадить (0 монет)</button>
                 `;
-                slotElement.querySelector('.plant-slot-btn').addEventListener('click', () => {
-                    plantTreeInSlot(slotNumber);
-                });
+                const plantBtn = slotElement.querySelector('.plant-slot-btn');
+                if (plantBtn) {
+                    plantBtn.addEventListener('click', () => {
+                        plantTreeInSlot(slotNumber);
+                    });
+                }
             }
         } else {
             slotElement.classList.add('locked');
@@ -732,9 +755,12 @@ function updateGardenSlotsUI() {
                 <div class="empty-slot">🔒</div>
                 <button class="btn btn-small unlock-slot-btn">Разблокировать (${CONSTANTS.GARDEN_SLOT_COST} монет)</button>
             `;
-            slotElement.querySelector('.unlock-slot-btn').addEventListener('click', () => {
-                unlockGardenSlot(slotNumber, CONSTANTS.GARDEN_SLOT_COST);
-            });
+            const unlockBtn = slotElement.querySelector('.unlock-slot-btn');
+            if (unlockBtn) {
+                unlockBtn.addEventListener('click', () => {
+                    unlockGardenSlot(slotNumber, CONSTANTS.GARDEN_SLOT_COST);
+                });
+            }
         }
         
         elements.gardenSlots.appendChild(slotElement);
@@ -864,7 +890,6 @@ function renderSkills() {
     // Inventory skills
     const exemFasterMatch = gameState.skills.inventory.upgrades.exemFasterMatch;
     if (elements.upgradeExem) {
-        
         elements.upgradeExem.disabled = gameState.skills.inventory.points < exemFasterMatch.cost || 
             exemFasterMatch.currentLevel >= exemFasterMatch.maxLevel;
     }
@@ -1042,19 +1067,21 @@ function showRoulette(type) {
         `;
         document.body.appendChild(rouletteModal);
         
-        rouletteModal.style.display = 'block';
+        rouletteModal.style.display = 'flex';
         setTimeout(() => {
             rouletteModal.classList.add('show');
         }, 10);
         
         const closeBtn = rouletteModal.querySelector('.close');
-        closeBtn.addEventListener('click', () => {
-            rouletteModal.classList.remove('show');
-            setTimeout(() => {
-                rouletteModal.remove();
-                reject();
-            }, 300);
-        });
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                rouletteModal.classList.remove('show');
+                setTimeout(() => {
+                    rouletteModal.remove();
+                    reject();
+                }, 300);
+            });
+        }
         
         const dropRates = gameState.chests[type].dropRates;
         const types = Object.keys(dropRates);
@@ -1185,6 +1212,9 @@ function applyChestReward(chestType, rewardType) {
 }
 
 function showRewardModal(chestType, rewardType) {
+    if (!elements.rewardModal || !elements.rewardEmoji || !elements.rewardName || 
+        !elements.rewardDescription || !elements.rewardBonus) return;
+    
     const reward = gameState.chests[chestType].dropRates[rewardType];
     
     let bonusText = '';
@@ -1712,19 +1742,27 @@ const game2048 = {
         
         elements.game2048Container.appendChild(victoryScreen);
         
-        document.getElementById('continue-btn')?.addEventListener('click', () => {
-            victoryScreen.remove();
-            this.isPlaying = true;
-            this.victoryShown = false;
-        });
+        const continueBtn = document.getElementById('continue-btn');
+        if (continueBtn) {
+            continueBtn.addEventListener('click', () => {
+                victoryScreen.remove();
+                this.isPlaying = true;
+                this.victoryShown = false;
+            });
+        }
         
-        document.getElementById('new-game-btn')?.addEventListener('click', () => {
-            victoryScreen.remove();
-            this.start();
-        });
+        const newGameBtn = document.getElementById('new-game-btn');
+        if (newGameBtn) {
+            newGameBtn.addEventListener('click', () => {
+                victoryScreen.remove();
+                this.start();
+            });
+        }
     },
 
     showGameOverScreen() {
+        if (!elements.game2048Container) return;
+        
         const gameOverScreen = document.createElement('div');
         gameOverScreen.className = 'game-over-screen';
         gameOverScreen.innerHTML = `
@@ -1743,15 +1781,21 @@ const game2048 = {
         
         elements.game2048Container.appendChild(gameOverScreen);
         
-        document.getElementById('try-again-btn')?.addEventListener('click', () => {
-            gameOverScreen.remove();
-            this.start();
-        });
+        const tryAgainBtn = document.getElementById('try-again-btn');
+        if (tryAgainBtn) {
+            tryAgainBtn.addEventListener('click', () => {
+                gameOverScreen.remove();
+                this.start();
+            });
+        }
         
-        document.getElementById('main-menu-btn')?.addEventListener('click', () => {
-            gameOverScreen.remove();
-            this.close();
-        });
+        const mainMenuBtn = document.getElementById('main-menu-btn');
+        if (mainMenuBtn) {
+            mainMenuBtn.addEventListener('click', () => {
+                gameOverScreen.remove();
+                this.close();
+            });
+        }
     },
 
     isGameOver() {
