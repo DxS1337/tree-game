@@ -36,9 +36,9 @@
     touch-action: manipulation;
 }
 
-html, body {
-    width: 100%;
-    height: 100%;
+html, body, .game-app {
+    width: var(--tg-viewport-width);
+    height: var(--tg-viewport-height);
     overflow: hidden;
     position: fixed;
     background-color: var(--tg-bg-color);
@@ -59,8 +59,7 @@ input, textarea {
 /* Main game container */
 .game-app {
     width: 100%;
-    height: 100vh;
-    max-height: -webkit-fill-available;
+    height: 100%;
     margin: 0;
     padding: 0;
     position: fixed;
@@ -70,10 +69,15 @@ input, textarea {
 }
 
 .main-content {
-    height: calc(100vh - 120px);
+    height: calc(var(--tg-viewport-height) - 120px);
     overflow-y: auto;
     padding-bottom: 120px;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.main-content::-webkit-scrollbar {
+    display: none;
 }
 
 .content-section {
@@ -87,6 +91,11 @@ input, textarea {
     transition: opacity 0.3s, transform 0.3s;
     opacity: 0;
     transform: translateY(10px);
+    display: none;
+    scrollbar-width: none;
+}
+
+.content-section::-webkit-scrollbar {
     display: none;
 }
 
@@ -404,6 +413,7 @@ input, textarea {
     z-index: 80;
     height: 60px;
     display: flex;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .nav-btn {
@@ -475,8 +485,8 @@ input, textarea {
 .chest-menu {
     display: none;
     position: absolute;
-    top: 80px;
-    right: 520px;
+    top: 50px;
+    right: 10px;
     background: white;
     padding: 10px;
     border-radius: 8px;
@@ -641,6 +651,7 @@ input, textarea {
     display: none;
     align-items: center;
     justify-content: center;
+    padding: 20px;
 }
 
 .roulette-modal.show {
@@ -655,7 +666,7 @@ input, textarea {
     border-radius: 12px;
     overflow: hidden;
     position: relative;
-    margin: 0 20px;
+    margin: 0 auto;
 }
 
 .roulette-items {
@@ -763,6 +774,7 @@ input, textarea {
     z-index: 1002;
     max-width: 300px;
     width: 90%;
+    display: none;
 }
 
 .reward-emoji {
@@ -829,19 +841,15 @@ input, textarea {
 /* 2048 game styles */
 .game-container {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 15px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
     z-index: 1001;
     display: none;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    max-width: 300px;
-    width: 100%;
-    max-height: 80vh;
-    overflow: auto;
+    padding: 15px;
+    overflow-y: auto;
 }
 
 #game-2048-board {
@@ -854,7 +862,7 @@ input, textarea {
     border-radius: 3px;
     width: 100%;
     max-width: 280px;
-    margin: 0 auto;
+    margin: 10px auto;
     aspect-ratio: 1/1;
 }
 
@@ -866,7 +874,7 @@ input, textarea {
     color: #776e65;
     border-radius: 2px;
     background-color: #cdc1b4;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
 }
 
 .tile-new {
@@ -968,6 +976,11 @@ input, textarea {
     margin: 0 auto 10px;
     padding: 0 5px;
     font-size: 0.8rem;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+    padding-top: 10px;
 }
 
 .games-container {
@@ -1069,6 +1082,11 @@ input, textarea {
 .achievement-scroll-container {
     max-height: 300px;
     overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.achievement-scroll-container::-webkit-scrollbar {
+    display: none;
 }
 
 .achievement-card {
@@ -1260,4 +1278,9 @@ input, textarea {
 
 .tab-btn:hover {
     background-color: rgba(46, 125, 50, 0.1);
+}
+
+/* Hide achievement lists by default */
+.achievement-list.hidden {
+    display: none;
 }
