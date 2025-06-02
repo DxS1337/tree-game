@@ -42,26 +42,6 @@
         <button id="apply-btn" class="btn btn-primary">Применить</button>
     </div>
 
-    <!-- Сундуки -->
-    <div class="chest-container">
-        <div class="chest-menu" id="chest-menu">
-            <div class="chest-option daily-chest" data-type="daily">
-                <div class="chest-icon">📅</div>
-                <div class="chest-info">
-                    <div class="chest-name">Ежедневный</div>
-                    <div class="chest-timer" id="daily-timer">Доступно</div>
-                </div>
-            </div>
-            <div class="chest-option premium-chest" data-type="premium">
-                <div class="chest-icon">💰</div>
-                <div class="chest-info">
-                    <div class="chest-name">Премиум</div>
-                    <div class="chest-price">200 <span class="currency">$</span></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Основной контент с разделами -->
     <div class="game-app">
         <div class="main-content">
@@ -85,6 +65,10 @@
                         <span class="resource-icon">🪙</span>
                         <span id="coins">0</span>
                     </div>
+                    <div class="resource">
+                        <span class="resource-icon">⚡</span>
+                        <span id="energy">5</span>/<span id="max-energy">5</span>
+                    </div>
                 </div>
                 
                 <div class="progress-container">
@@ -100,7 +84,7 @@
 
                 <div class="progress-container energy-container">
                     <div class="progress-header">
-                        <span>Энергия: <span id="energy-value"></span><span id="max-energy-value"></span></span>
+                        <span>Энергия: <span id="energy-value">5</span>/<span id="max-energy-value">5</span></span>
                     </div>
                     <div class="progress-bar">
                         <div class="energy-fill" id="energy-bar"></div>
@@ -111,17 +95,21 @@
                 <div class="garden-container">
                     <h3>🌻 Мой сад</h3>
                     <div class="garden-slots" id="garden-slots">
-                        <!-- Базовый слот (бесплатный) -->
-                        <div class="garden-slot" data-slot="1">
-                            <div class="tree-display">🌱</div>
-                            <button class="btn btn-small plant-slot-btn">Посадить (0 монет)</button>
-                        </div>
-                        
-                        <!-- Дополнительные платные слоты -->
-                        <div class="garden-slot locked" data-slot="2">
-                            <div class="empty-slot">🔒</div>
-                            <button class="btn btn-small unlock-slot-btn">Разблокировать (1000 монет)</button>
-                        </div>
+                        <!-- Слоты будут добавлены динамически через JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Мини-игры -->
+                <div class="games-container">
+                    <div class="game-card" id="game-2048">
+                        <div class="game-icon">🧩</div>
+                        <div class="game-name">2048</div>
+                        <div class="game-reward">Награда: 5 монет</div>
+                    </div>
+                    <div class="game-card coming-soon">
+                        <div class="game-icon">🎮</div>
+                        <div class="game-name">Скоро</div>
+                        <div class="game-reward">Новая игра</div>
                     </div>
                 </div>
             </div>
@@ -141,8 +129,19 @@
                     <div class="skills-scrollable">
                         <div class="skill-points-display">Очки навыков: <span id="skill-points">0</span></div>
                         
-                        <!-- Существующие навыки -->
                         <div class="skill-category">
+                            <h3>Садоводство</h3>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <div class="skill-name">Дополнительные слоты</div>
+                                    <div class="skill-level">Уровень: 0/3</div>
+                                </div>
+                                <button class="skill-upgrade-btn" id="upgrade-gardening-slot">Улучшить</button>
+                            </div>
+                        </div>
+                        
+                        <div class="skill-category">
+                            <h3>Инвентарь</h3>
                             <div class="skill-item">
                                 <div class="skill-info">
                                     <div class="skill-name">Быстрое сопоставление</div>
