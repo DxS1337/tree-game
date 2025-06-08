@@ -1,6 +1,6 @@
 // Telegram WebApp initialization
 'use strict';
-
+<meta name="mobile-web-app-capable" content="yes">
 let tg;
 if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
     tg = Telegram.WebApp;
