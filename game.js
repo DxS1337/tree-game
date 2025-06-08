@@ -1,45 +1,21 @@
 // Telegram WebApp initialization
-let tg = window.Telegram.WebApp;
-
-function initTelegramWebApp() {
-    if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-        tg = Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
-        
-        // Устанавливаем цвета из Telegram
-        document.documentElement.style.setProperty('--tg-header-color', tg.headerColor || '#2e7d32');
-        document.documentElement.style.setProperty('--tg-bg-color', tg.backgroundColor || '#f5f5f5');
-        document.documentElement.style.setProperty('--tg-text-color', tg.themeParams.text_color || '#1b5e20');
-        
-        // Обновляем viewport
-        updateViewport();
-        tg.onEvent('viewportChanged', updateViewport);
-        
-        // Предотвращаем сворачивание при свайпе в игре 2048
-        document.addEventListener('touchmove', function(e) {
-            if (game2048.isPlaying && elements.game2048Container && elements.game2048Container.style.display === 'block') {
-                e.preventDefault();
-            }
-        }, { passive: false });
-    } else {
-        console.warn('Telegram WebApp не обнаружен. Режим совместимости.');
-        tg = { 
-            WebApp: { 
-                platform: 'unknown', 
-                expand: () => {}, 
-                showPopup: () => {},
-                colorScheme: 'light'
-            } 
-        };
-    }
-}
-
-function updateViewport() {
-    const viewportHeight = tg?.viewportHeight || window.innerHeight;
-    const viewportWidth = tg?.viewportWidth || window.innerWidth;
-    document.documentElement.style.setProperty('--tg-viewport-height', `${viewportHeight}px`);
-    document.documentElement.style.setProperty('--tg-viewport-width', `${viewportWidth}px`);
+let tg;
+if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+    tg = Telegram.WebApp;
+    tg.expand();
+    tg.enableClosingConfirmation();
+    tg.viewportStableHeight = tg.viewportHeight;
+} else {
+    console.warn('Telegram WebApp не обнаружен. Режим совместимости.');
+    tg = { 
+        WebApp: { 
+            platform: 'unknown', 
+            expand: () => {}, 
+            showPopup: () => {},
+            colorScheme: 'light',
+            viewportHeight: window.innerHeight
+        } 
+    };
 }
 
 // Константы игры
@@ -52,12 +28,15 @@ const CONSTANTS = {
     XP_MULTIPLIER: 0.1,
     ENERGY_REGEN_TIME: 10 * 60 * 1000,
     DEFAULT_USERNAME: "Игрок",
+    THEME_MODES: ['auto', 'light', 'dark'],
     GARDEN_SLOT_COST: 1000,
-    TREE_DEATH_TIME: 7 * 24 * 60 * 60 * 1000, // 7 дней в мс
+    TREE_DEATH_TIME: 7 * 24 * 60 * 60 * 1000,
     TREE_GROWTH_STAGES: ['🌱', '🌿', '🌳', '🌲'],
-    TREE_GROWTH_XP: [0, 5, 10, 20], // XP за каждый уровень роста
-    SKILL_POINT_CHANCE: 0.1, // 10% шанс получить очко навыка при поливе
-    BASE_SKILL_POINTS: 1 // Базовое количество очков за уровень
+    TREE_GROWTH_XP: [0, 5, 10, 20],
+    SKILL_POINT_CHANCE: 0.1,
+    BASE_SKILL_POINTS: 1,
+    IS_TELEGRAM: typeof Telegram !== 'undefined',
+    VIEWPORT_HEIGHT: tg.WebApp.viewportHeight
 };
 
 // Состояние игры
@@ -74,32 +53,15 @@ const gameState = {
     lastSave: 0,
     energyChanged: false,
     coinsChanged: false,
-    activeTreeSlot: null, // Активный слот для полива
+    activeTreeSlot: null,
     gardenSlots: {
-        1: { 
-            unlocked: true, 
-            tree: null,
-            lastWatered: null,
-            growthStage: 0,
-            xp: 0
-        },
-        2: { 
-            unlocked: false, 
-            tree: null,
-            lastWatered: null,
-            growthStage: 0,
-            xp: 0
-        },
-        3: { 
-            unlocked: false, 
-            tree: null,
-            lastWatered: null,
-            growthStage: 0,
-            xp: 0
-        }
+        1: { unlocked: true, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
+        2: { unlocked: false, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
+        3: { unlocked: false, tree: null, lastWatered: null, growthStage: 0, xp: 0 }
     },
     profile: {
         username: CONSTANTS.DEFAULT_USERNAME,
+        themeMode: 'auto',
         achievements: []
     },
     upgrades: {
@@ -117,53 +79,16 @@ const gameState = {
         gardening: {
             points: 0,
             upgrades: {
-                extraSlot: {
-                    name: "Доп. слот",
-                    currentLevel: 0,
-                    maxLevel: 3,
-                    cost: 1,
-                    effect: 1,
-                    description: "Открывает дополнительный слот для деревьев"
-                },
-                fasterGrowth: {
-                    name: "Быстрый рост",
-                    currentLevel: 0,
-                    maxLevel: 5,
-                    cost: 1,
-                    effect: 0.2,
-                    description: "Увеличивает скорость роста деревьев на 20%"
-                }
+                extraSlot: { name: "Доп. слот", currentLevel: 0, maxLevel: 3, cost: 1, effect: 1, description: "Открывает дополнительный слот для деревьев" },
+                fasterGrowth: { name: "Быстрый рост", currentLevel: 0, maxLevel: 5, cost: 1, effect: 0.2, description: "Увеличивает скорость роста деревьев на 20%" }
             }
         },
         inventory: {
             points: 0,
             upgrades: {
-                exemFasterMatch: {
-                    name: "Быстрое сопоставление",
-                    currentLevel: 0,
-                    maxLevel: 5,
-                    cost: 1,
-                    effect: 0.1,
-                    description: "Увеличивает скорость работы с инвентарем"
-                },
-                quickHands: {
-                    name: "Ловкие руки",
-                    currentLevel: 0,
-                    maxLevel: 3,
-                    cost: 2,
-                    effect: 0.15,
-                    description: "Увеличивает скорость взаимодействия",
-                    required: { skill: "exemFasterMatch", level: 2 }
-                },
-                organized: {
-                    name: "Организованное пространство",
-                    currentLevel: 0,
-                    maxLevel: 4,
-                    cost: 3,
-                    effect: 0.2,
-                    description: "Увеличивает вместимость инвентаря",
-                    required: { skill: "quickHands", level: 1 }
-                }
+                exemFasterMatch: { name: "Быстрое сопоставление", currentLevel: 0, maxLevel: 5, cost: 1, effect: 0.1, description: "Увеличивает скорость работы с инвентарем" },
+                quickHands: { name: "Ловкие руки", currentLevel: 0, maxLevel: 3, cost: 2, effect: 0.15, description: "Увеличивает скорость взаимодействия", required: { skill: "exemFasterMatch", level: 2 } },
+                organized: { name: "Организованное пространство", currentLevel: 0, maxLevel: 4, cost: 3, effect: 0.2, description: "Увеличивает вместимость инвентаря", required: { skill: "quickHands", level: 1 } }
             }
         }
     },
@@ -172,68 +97,19 @@ const gameState = {
             lastOpened: 0,
             cooldown: CONSTANTS.DAILY_CHEST_COOLDOWN,
             dropRates: {
-                common: { 
-                    chance: 60, 
-                    emoji: '🌿', 
-                    bonus: { xp: 2, coins: 5 }, 
-                    name: "Обычный",
-                    rarity: 'common',
-                    description: "Небольшая награда за ежедневное посещение"
-                },
-                rare: { 
-                    chance: 30, 
-                    emoji: '🌳', 
-                    bonus: { xp: 5, coins: 10 }, 
-                    name: "Редкий",
-                    rarity: 'rare',
-                    description: "Хорошая награда для мотивации"
-                },
-                epic: { 
-                    chance: 10, 
-                    emoji: '🌲', 
-                    bonus: { xp: 10, coins: 20, energy: 1 }, 
-                    name: "Эпический",
-                    rarity: 'epic',
-                    description: "Отличная награда! Продолжайте в том же духе!"
-                }
+                common: { chance: 60, emoji: '🌿', bonus: { xp: 2, coins: 5 }, name: "Обычный", rarity: 'common', description: "Небольшая награда за ежедневное посещение" },
+                rare: { chance: 30, emoji: '🌳', bonus: { xp: 5, coins: 10 }, name: "Редкий", rarity: 'rare', description: "Хорошая награда для мотивации" },
+                epic: { chance: 10, emoji: '🌲', bonus: { xp: 10, coins: 20, energy: 1 }, name: "Эпический", rarity: 'epic', description: "Отличная награда! Продолжайте в том же духе!" }
             }
         },
         premium: {
             price: CONSTANTS.PREMIUM_CHEST_PRICE,
             pityCounter: 0,
             dropRates: {
-                oak: { 
-                    chance: 40, 
-                    emoji: '🌳', 
-                    bonus: { xp: 5 }, 
-                    name: "Саженец Дуба",
-                    rarity: 'uncommon',
-                    description: "Молодой дуб приносит опыт"
-                },
-                golden: { 
-                    chance: 30, 
-                    emoji: '💰', 
-                    bonus: { coins: 20 }, 
-                    name: "Мешочек Золота",
-                    rarity: 'rare',
-                    description: "Блестящая золотая награда"
-                },
-                magic: { 
-                    chance: 20, 
-                    emoji: '🔮', 
-                    bonus: { discount: 0.1 }, 
-                    name: "Магический Шар",
-                    rarity: 'epic',
-                    description: "Магическая сила снижает цены в магазине"
-                },
-                elder: { 
-                    chance: 10, 
-                    emoji: '🍂', 
-                    bonus: { energy: 2 }, 
-                    name: "Древний Листок",
-                    rarity: 'legendary',
-                    description: "Древняя мудрость даёт дополнительную энергию"
-                }
+                oak: { chance: 40, emoji: '🌳', bonus: { xp: 5 }, name: "Саженец Дуба", rarity: 'uncommon', description: "Молодой дуб приносит опыт" },
+                golden: { chance: 30, emoji: '💰', bonus: { coins: 20 }, name: "Мешочек Золота", rarity: 'rare', description: "Блестящая золотая награда" },
+                magic: { chance: 20, emoji: '🔮', bonus: { discount: 0.1 }, name: "Магический Шар", rarity: 'epic', description: "Магическая сила снижает цены в магазине" },
+                elder: { chance: 10, emoji: '🍂', bonus: { energy: 2 }, name: "Древний Листок", rarity: 'legendary', description: "Древняя мудрость даёт дополнительную энергию" }
             }
         }
     },
@@ -275,6 +151,7 @@ const elements = {
     skillsNav: document.getElementById('skills-nav'),
     shopNav: document.getElementById('shop-nav'),
     homeNav: document.getElementById('home-nav'),
+    gamepadNav: document.getElementById('gamepad-nav'),
     profileNav: document.getElementById('profile-nav'),
     inventoryPoints: document.getElementById('inventory-points'),
     upgradeExem: document.getElementById('upgrade-exem'),
@@ -309,31 +186,114 @@ const elements = {
     game2048Close: document.getElementById('game-2048-close'),
     tileValueDisplay: document.getElementById('tile-value-display'),
     username: document.getElementById('username'),
+    themeToggle: document.getElementById('theme-toggle'),
     allAchievements: document.getElementById('all-achievements'),
     unlockedAchievements: document.getElementById('unlocked-achievements'),
-    gardenSlots: document.getElementById('garden-slots')
+    gardenSlots: document.getElementById('garden-slots'),
+    profileBtn: document.getElementById('profile-btn'),
+    loadingScreen: document.getElementById('loading-screen'),
+    loadingProgress: document.querySelector('.loading-progress'),
+    gameApp: document.querySelector('.game-app')
 };
+
+// Параметры загрузки
+const LOADING_STEPS = {
+    INIT: 10,
+    STATE: 30,
+    UI: 20,
+    LISTENERS: 20,
+    FINISH: 20
+};
+
+let currentProgress = 0;
+
+// Обновление прогресса загрузки
+function updateProgress(step) {
+    if (!elements.loadingScreen) return;
+    
+    currentProgress += step;
+    const progressPercent = Math.min(100, Math.floor(currentProgress));
+    elements.loadingProgress.textContent = `${progressPercent}%`;
+    
+    if (progressPercent >= 100) {
+        setTimeout(() => {
+            elements.loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                elements.loadingScreen.style.display = 'none';
+                document.body.classList.add('loaded');
+                elements.gameApp.classList.add('loaded');
+            }, 500);
+        }, 300);
+    }
+}
 
 // Инициализация игры
 function initGame() {
-    setupEventListeners();
-    loadGame();
-    initAchievements();
-    updateUI();
-    updateChestTimer();
-    renderSkills();
-    renderShop();
-    renderAchievements();
-    updateGardenSlotsUI();
-    initTelegramWebApp();
-
-    if (elements.rewardModal) elements.rewardModal.style.display = 'none';
-    checkTreeHealth();
+    updateProgress(LOADING_STEPS.INIT);
     
-    // Запускаем таймеры
-    setInterval(updateChestTimer, 60000);
-    setInterval(regenerateEnergy, CONSTANTS.ENERGY_REGEN_TIME);
-    setInterval(checkTreeHealth, 24 * 60 * 60 * 1000); // Проверка здоровья деревьев раз в день
+    setTimeout(() => {
+        applyTheme();
+        updateProgress(LOADING_STEPS.STATE);
+        
+        setTimeout(() => {
+            loadGame();
+            updateProgress(LOADING_STEPS.UI);
+            
+            setTimeout(() => {
+                initAchievements();
+                updateUI();
+                updateChestTimer();
+                renderSkills();
+                renderShop();
+                renderAchievements();
+                updateGardenSlotsUI();
+                updateProgress(LOADING_STEPS.LISTENERS);
+                
+                setTimeout(() => {
+                    setupEventListeners();
+                    updateProgress(LOADING_STEPS.FINISH);
+                    
+                    // Инициализация для Telegram
+                    if (CONSTANTS.IS_TELEGRAM) {
+                        document.documentElement.style.setProperty('--viewport-height', `${CONSTANTS.VIEWPORT_HEIGHT}px`);
+                        document.body.classList.add('telegram-app');
+                        
+                        // Отключаем масштабирование на iOS
+                        document.addEventListener('touchmove', function(e) {
+                            if (e.scale !== 1) { e.preventDefault(); }
+                        }, { passive: false });
+                        
+                        // Обработка изменения размера WebApp
+                        Telegram.WebApp.onEvent('viewportChanged', () => {
+                            const newHeight = Telegram.WebApp.viewportHeight;
+                            document.documentElement.style.setProperty('--viewport-height', `${newHeight}px`);
+                        });
+                        
+                        // Оптимизация для iOS
+                        if (tg.platform === 'ios') {
+                            document.body.style.height = `${tg.viewportHeight}px`;
+                            window.addEventListener('resize', () => {
+                                document.body.style.height = `${tg.viewportHeight}px`;
+                            });
+                        }
+                    }
+                    
+                    // Добавляем кнопку "Поделиться" если в Telegram
+                    if (tg?.platform !== 'unknown') {
+                        addShareButton();
+                    }
+                    
+                    // Запускаем таймеры
+                    setInterval(updateChestTimer, 60000);
+                    setInterval(regenerateEnergy, CONSTANTS.ENERGY_REGEN_TIME);
+                    setInterval(checkTreeHealth, 24 * 60 * 60 * 1000);
+                    
+                    elements.rewardModal.style.display = 'none';
+                    checkTreeHealth();
+                }, 50);
+            }, 50);
+        }, 50);
+    }, 50);
 }
 
 // Настройка обработчиков событий
@@ -1519,8 +1479,13 @@ const game2048 = {
     target: 2048,
     reachedTarget: false,
     victoryShown: false,
+    touchStartX: 0,
+    touchStartY: 0,
+    touchEndX: 0,
+    touchEndY: 0,
 
-    init() {
+
+        init() {
         this.board = Array(4).fill().map(() => Array(4).fill(0));
         this.score = 0;
         this.reachedTarget = false;
@@ -1530,6 +1495,54 @@ const game2048 = {
         this.addRandomTile();
         this.updateUI();
         this.isPlaying = true;
+    },
+    handleTouchStart(e) {
+        if (!this.isPlaying) return;
+        this.touchStartX = e.changedTouches[0].screenX;
+        this.touchStartY = e.changedTouches[0].screenY;
+    },
+    
+    handleTouchEnd(e) {
+        if (!this.isPlaying) return;
+        this.touchEndX = e.changedTouches[0].screenX;
+        this.touchEndY = e.changedTouches[0].screenY;
+        this.handleSwipe();
+    },
+    
+    handleSwipe() {
+        const dx = this.touchEndX - this.touchStartX;
+        const dy = this.touchEndY - this.touchStartY;
+        const minSwipeDistance = 50;
+        
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (Math.abs(dx) < minSwipeDistance) return;
+            if (dx > 0) this.move('right');
+            else this.move('left');
+        } else {
+            if (Math.abs(dy) < minSwipeDistance) return;
+            if (dy > 0) this.move('down');
+            else this.move('up');
+        }
+    },
+
+    start() {
+        this.init();
+        if (elements.game2048Container) {
+            elements.game2048Container.style.display = 'block';
+            elements.game2048Container.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
+            elements.game2048Container.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
+        }
+    },
+
+    close() {
+        this.isPlaying = false;
+        if (elements.game2048Container) {
+            elements.game2048Container.style.display = 'none';
+            elements.game2048Container.removeEventListener('touchstart', this.handleTouchStart);
+            elements.game2048Container.removeEventListener('touchend', this.handleTouchEnd);
+        }
+        const victoryScreen = elements.game2048Container?.querySelector('.victory-screen');
+        if (victoryScreen) victoryScreen.remove();
     },
 
     loadBestScore() {
@@ -1868,6 +1881,15 @@ const game2048 = {
         if (victoryScreen) victoryScreen.remove();
     }
 };
+document.addEventListener('DOMContentLoaded', () => {
+    // Показываем экран загрузки сразу
+    if (elements.loadingScreen) {
+        elements.loadingScreen.style.display = 'flex';
+    }
+    
+    // Запускаем инициализацию игры
+    initGame();
+});
 
 // Запуск игры
 document.addEventListener('DOMContentLoaded', initGame);
