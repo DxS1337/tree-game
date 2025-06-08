@@ -1206,27 +1206,26 @@ function isLocalStorageAvailable() {
 function loadGame() {
     if (!isLocalStorageAvailable()) return;
 
-    const saveData = localStorage.getItem('tree-game-save');
-    if (saveData) {
-        const parsed = JSON.parse(saveData);
-        
-        // Восстановите profile, если он есть в сохранении
-        if (parsed.profile) {
-            gameState.profile = {
-                ...gameState.profile, // Значения по умолчанию
-                ...parsed.profile,    // Загруженные данные
-            };
-        }
-    }
-}
-
-    try {  // <-- Этот блок начинается после лишней закрывающей скобки
+    try {
         const saveData = localStorage.getItem('tree-game-save');
-        // ...
+        if (saveData) {
+            const parsed = JSON.parse(saveData);
+            
+            // Восстановите profile, если он есть в сохранении
+            if (parsed.profile) {
+                gameState.profile = {
+                    ...gameState.profile, // Значения по умолчанию
+                    ...parsed.profile,    // Загруженные данные
+                };
+            }
+        }
     } catch (e) {
         console.error("Ошибка загрузки сохранения:", e);
+        const backupName = 'tree-game-save-corrupted-' + Date.now();
+        localStorage.setItem(backupName, localStorage.getItem('tree-game-save'));
+        localStorage.removeItem('tree-game-save');
     }
-}            
+}  
             if (parsed && typeof parsed === 'object') {
                 // Основные данные игры
                 gameState.level = parsed.level || 1;
