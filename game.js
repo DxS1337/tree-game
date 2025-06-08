@@ -1220,11 +1220,13 @@ function loadGame() {
     }
 }
 
-    try {
+    try {  // <-- Этот блок начинается после лишней закрывающей скобки
         const saveData = localStorage.getItem('tree-game-save');
-        if (saveData) {
-            const parsed = JSON.parse(saveData);
-            
+        // ...
+    } catch (e) {
+        console.error("Ошибка загрузки сохранения:", e);
+    }
+}            
             if (parsed && typeof parsed === 'object') {
                 // Основные данные игры
                 gameState.level = parsed.level || 1;
