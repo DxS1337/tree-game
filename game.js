@@ -1785,10 +1785,4 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.loadingScreen.style.display = 'flex';
     }
     initGame();
-    
-    // Запускаем инициализацию игры
-    initGame();
 });
-
-// Запуск игры
-document.addEventListener('DOMContentLoaded', initGame);
