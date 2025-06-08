@@ -2,6 +2,24 @@
 'use strict';
 
 let tg;
+if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+    tg = Telegram.WebApp;
+    tg.expand(); // Раскрываем WebApp на весь экран
+    
+    // Удалены неподдерживаемые методы
+    console.log('Telegram WebApp инициализирован, платформа:', tg.platform);
+} else {
+    console.warn('Telegram WebApp не обнаружен. Режим совместимости.');
+    tg = { 
+        WebApp: { 
+            platform: 'unknown', 
+            expand: () => {},
+            showPopup: () => {},
+            colorScheme: 'light',
+            viewportHeight: window.innerHeight
+        } 
+    };
+}
 
 // Game constants
 const CONSTANTS = {
