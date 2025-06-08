@@ -44,7 +44,11 @@ const CONSTANTS = {
 
 // Game state (unchanged)
 const gameState = {
-    // ... (previous gameState definition remains the same)
+    profile: {
+        username: "Игрок",
+        achievements: [],
+        themeMode: "auto", // Добавьте значение по умолчанию
+    },
 };
 
 // Initialize achievements
@@ -96,16 +100,19 @@ function updateProgress(step) {
 
 // Apply theme function
 function applyTheme() {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const themeMode = gameState.profile.themeMode || 'auto';
-    
-    if (themeMode === 'dark' || (themeMode === 'auto' && prefersDark)) {
-        document.body.classList.add('dark-theme');
-    } else {
-        document.body.classList.remove('dark-theme');
+    try {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const themeMode = gameState.profile?.themeMode || 'auto'; // Запасное значение
+        
+        if (themeMode === 'dark' || (themeMode === 'auto' && prefersDark)) {
+            document.body.classList.add('dark-theme');
+        } else {
+            document.body.classList.remove('dark-theme');
+        }
+    } catch (error) {
+        console.error('Ошибка в applyTheme:', error);
     }
 }
-
 // Add share button for Telegram
 function addShareButton() {
     if (tg?.platform !== 'unknown' && !document.getElementById('share-btn')) {
@@ -1197,10 +1204,21 @@ function isLocalStorageAvailable() {
 }
 
 function loadGame() {
-    if (!isLocalStorageAvailable()) {
-        console.warn('LocalStorage недоступен. Игра запущена с начальными значениями.');
-        return;
+    if (!isLocalStorageAvailable()) return;
+
+    const saveData = localStorage.getItem('tree-game-save');
+    if (saveData) {
+        const parsed = JSON.parse(saveData);
+        
+        // Восстановите profile, если он есть в сохранении
+        if (parsed.profile) {
+            gameState.profile = {
+                ...gameState.profile, // Значения по умолчанию
+                ...parsed.profile,    // Загруженные данные
+            };
+        }
     }
+}
 
     try {
         const saveData = localStorage.getItem('tree-game-save');
