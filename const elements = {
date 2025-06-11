@@ -1,25 +1,25 @@
 // Telegram WebApp initialization
 'use strict';
 
-let tg;
+let tg = {
+    WebApp: {
+        platform: 'unknown',
+        expand: () => {},
+        showPopup: () => {},
+        colorScheme: 'light',
+        viewportHeight: window.innerHeight
+    }
+};
+
 if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
     tg = Telegram.WebApp;
-    tg.expand(); // Раскрываем WebApp на весь экран
-    
-    // Удалены неподдерживаемые методы
+    tg.expand();
+    tg.enableClosingConfirmation();
     console.log('Telegram WebApp инициализирован, платформа:', tg.platform);
 } else {
     console.warn('Telegram WebApp не обнаружен. Режим совместимости.');
-    tg = { 
-        WebApp: { 
-            platform: 'unknown', 
-            expand: () => {},
-            showPopup: () => {},
-            colorScheme: 'light',
-            viewportHeight: window.innerHeight
-        } 
-    };
 }
+
 
 // Game constants
 const CONSTANTS = {
@@ -64,8 +64,13 @@ let isNotificationShowing = false;
 
 // DOM elements
 const elements = {
-    // ... (previous elements definition remains the same)
+    loadingScreen: document.getElementById('loading-screen'),
+    loadingProgress: document.getElementById('loading-progress'),
+    // ... остальные элементы
 };
+
+if (!elements.loadingScreen) console.error('Loading screen element not found');
+
 
 // Loading steps
 const LOADING_STEPS = {
@@ -168,10 +173,12 @@ function initGame() {
                     updateProgress(LOADING_STEPS.FINISH);
                     
                     // Telegram specific initialization
-                    if (CONSTANTS.IS_TELEGRAM) {
-                        document.documentElement.style.setProperty('--viewport-height', `${CONSTANTS.VIEWPORT_HEIGHT}px`);
-                        document.body.classList.add('telegram-app');
-                        
+                        if (CONSTANTS.IS_TELEGRAM) {
+                            const viewportHeight = tg.viewportHeight || window.innerHeight;
+                            document.documentElement.style.setProperty('--viewport-height', `${viewportHeight}px`);
+                            document.body.classList.add('telegram-app');
+                        }
+                                                
                         // Disable zoom on iOS
                         document.addEventListener('touchmove', function(e) {
                             if (e.scale !== 1) { e.preventDefault(); }
@@ -192,6 +199,13 @@ function initGame() {
                         }
                     }
                     
+                                        if (CONSTANTS.IS_TELEGRAM) {
+                        tg.onEvent('viewportChanged', () => {
+                            const newHeight = tg.viewportHeight;
+                            document.documentElement.style.setProperty('--viewport-height', `${newHeight}px`);
+                        });
+                    }
+
                     // Add share button if in Telegram
                     if (tg?.platform !== 'unknown') {
                         addShareButton();
