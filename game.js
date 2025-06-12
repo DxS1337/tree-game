@@ -245,33 +245,6 @@ function applyTheme() {
     }
 }
 
-// Add share button for Telegram
-function addShareButton() {
-    if (tg?.platform !== 'unknown' && !document.getElementById('share-btn')) {
-        const shareBtn = document.createElement('button');
-        shareBtn.id = 'share-btn';
-        shareBtn.className = 'btn btn-secondary';
-        shareBtn.textContent = 'Поделиться';
-        shareBtn.style.position = 'fixed';
-        shareBtn.style.bottom = '60px';
-        shareBtn.style.right = '10px';
-        shareBtn.style.zIndex = '1000';
-        
-        shareBtn.addEventListener('click', () => {
-            if (tg?.WebApp?.share) {
-                tg.WebApp.share({
-                    title: 'Дерево-Игра',
-                    text: 'Попробуй эту крутую игру!',
-                    url: window.location.href
-                });
-            } else {
-                showNotification('Функция "Поделиться" недоступна');
-            }
-        });
-        
-        document.body.appendChild(shareBtn);
-    }
-}
         function initAchievements() {
             if (!gameState.achievementsData) return;
             gameState.achievementsData.forEach(ach => {
@@ -332,11 +305,6 @@ function initGame() {
                         window.addEventListener('resize', () => {
                             document.body.style.height = `${tg.viewportHeight}px`;
                         });
-                    }
-                    
-                    // Add share button if in Telegram
-                    if (tg?.platform !== 'unknown') {
-                        addShareButton();
                     }
                     
                     // Start timers
