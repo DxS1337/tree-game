@@ -11,6 +11,7 @@ let tg = {
     }
 };
 
+
 if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
     tg = Telegram.WebApp;
     tg.expand();
