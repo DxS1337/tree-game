@@ -42,11 +42,47 @@ const CONSTANTS = {
 };
 
 // Game state (расширенная инициализация)
-const gameState = {
+gameState = {
     profile: {
         username: "Игрок",
         achievements: [],
         themeMode: "auto",
+    },
+    achievementsData: [
+        {
+            id: 'first-tree',
+            title: 'Первое дерево',
+            description: 'Посади своё первое дерево!',
+            icon: '🌱',
+            unlocked: false
+        },
+        {
+            id: 'trader',
+            title: 'Торговец',
+            description: 'Получи 100 монет.',
+            icon: '🪙',
+            unlocked: false
+        },
+        {
+            id: 'gardener',
+            title: 'Садовник',
+            description: 'Разблокируй все слоты сада.',
+            icon: '🌻',
+            unlocked: false
+        },
+        {
+            id: 'expert',
+            title: 'Эксперт',
+            description: 'Достигни 10 уровня.',
+            icon: '🎓',
+            unlocked: false
+        },
+        {
+            id: 'collector',
+            title: 'Коллекционер',
+            description: 'Открой все награды ежедневного сундука.',
+            icon: '🎁',
+            unlocked: false
     },
     level: 1,
     xp: 0,
