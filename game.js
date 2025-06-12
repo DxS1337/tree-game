@@ -324,21 +324,22 @@ function initGame() {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Basic buttons
+    // Основные кнопки
     if (elements.waterBtn) elements.waterBtn.addEventListener('click', waterTree);
     if (elements.plantBtn) elements.plantBtn.addEventListener('click', plantTree);
-    
-    // Navigation
+
+    // Навигация
     if (elements.skillsNav) elements.skillsNav.addEventListener('click', () => showContentSection('skills-content'));
     if (elements.shopNav) elements.shopNav.addEventListener('click', () => showContentSection('shop-content'));
     if (elements.homeNav) elements.homeNav.addEventListener('click', () => showContentSection('home-content'));
     if (elements.profileNav) elements.profileNav.addEventListener('click', () => showContentSection('profile-content'));
-    
+    if (elements.gamepadNav) elements.gamepadNav.addEventListener('click', () => showContentSection('games-content'));
+
     // Skills
     if (elements.upgradeExem) elements.upgradeExem.addEventListener('click', () => upgradeSkill('inventory', 'exemFasterMatch'));
     if (elements.upgradeQuickHands) elements.upgradeQuickHands.addEventListener('click', () => upgradeSkill('inventory', 'quickHands'));
     if (elements.upgradeOrganized) elements.upgradeOrganized.addEventListener('click', () => upgradeSkill('inventory', 'organized'));
-    
+
     // Admin panel
     if (elements.adminBtn) {
         elements.adminBtn.addEventListener('click', (e) => {
@@ -346,10 +347,10 @@ function setupEventListeners() {
             if (elements.adminPanel) elements.adminPanel.classList.toggle('show');
         });
     }
-    
+
     if (elements.resetBtn) elements.resetBtn.addEventListener('click', resetGame);
     if (elements.applyBtn) elements.applyBtn.addEventListener('click', applyAdminSettings);
-    
+
     if (elements.addBlockBtn) {
         elements.addBlockBtn.addEventListener('click', () => {
             if (game2048.isPlaying) {
@@ -358,7 +359,7 @@ function setupEventListeners() {
             }
         });
     }
-    
+
     if (elements.addTileBtn) {
         elements.addTileBtn.addEventListener('click', () => {
             const value = parseInt(elements.setTileValue?.value) || 2;
@@ -368,13 +369,13 @@ function setupEventListeners() {
             }
         });
     }
-    
+
     if (elements.setTileValue) {
         elements.setTileValue.addEventListener('input', function() {
             if (elements.tileValueDisplay) elements.tileValueDisplay.textContent = this.value;
         });
     }
-    
+
     // Chests
     if (elements.chestMenuBtn) {
         elements.chestMenuBtn.addEventListener('click', (e) => {
@@ -385,20 +386,12 @@ function setupEventListeners() {
             }
         });
     }
-    
-    document.querySelectorAll('.chest-option').forEach(option => {
-        option.addEventListener('click', function() {
-            if (gameState.openingChest) return;
-            openChest(this.dataset.type);
-            if (elements.chestMenu) elements.chestMenu.classList.remove('show');
-        });
-    });
-    
+
     // Games
     if (elements.game2048Card) elements.game2048Card.addEventListener('click', () => game2048.start());
     if (elements.game2048Restart) elements.game2048Restart.addEventListener('click', () => game2048.start());
     if (elements.game2048Close) elements.game2048Close.addEventListener('click', () => game2048.close());
-    
+
     // Profile
     if (elements.username) {
         elements.username.addEventListener('change', function() {
@@ -406,20 +399,16 @@ function setupEventListeners() {
             saveGame();
         });
     }
-    
-    // Achievement tabs
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+
+    // Achievement tabs (делегировано)
+    document.body.addEventListener('click', function(e) {
+        if (e.target.classList.contains('tab-btn')) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            
-            document.querySelectorAll('.achievement-list').forEach(list => {
-                list.classList.add('hidden');
-            });
-            
-            const tabContent = document.getElementById(`${this.dataset.tab}-achievements`);
+            e.target.classList.add('active');
+            document.querySelectorAll('.achievement-list').forEach(list => list.classList.add('hidden'));
+            const tabContent = document.getElementById(`${e.target.dataset.tab}-achievements`);
             if (tabContent) tabContent.classList.remove('hidden');
-        });
+        }
     });
 
     // Click outside modals
@@ -438,7 +427,6 @@ function setupEventListeners() {
     // Keyboard controls for 2048
     document.addEventListener('keydown', (e) => {
         if (!game2048.isPlaying || !elements.game2048Container || elements.game2048Container.style.display !== 'block') return;
-        
         switch(e.key) {
             case 'ArrowLeft': game2048.move('left'); break;
             case 'ArrowUp': game2048.move('up'); break;
@@ -463,7 +451,7 @@ function setupEventListeners() {
                 elements.rewardModal.style.display = 'none';
             });
         }
-        
+
         const rewardBtn = elements.rewardModal.querySelector('.btn');
         if (rewardBtn) {
             rewardBtn.addEventListener('click', () => {
