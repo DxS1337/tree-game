@@ -201,11 +201,10 @@ function initGame() {
                     }
                     
                                         if (CONSTANTS.IS_TELEGRAM) {
-                        tg.onEvent('viewportChanged', () => {
-                            const newHeight = tg.viewportHeight;
-                            document.documentElement.style.setProperty('--viewport-height', `${newHeight}px`);
-                        });
-                    }
+                    tg.onEvent('viewportChanged', () => {
+                        const newHeight = tg.viewportHeight;
+                        document.documentElement.style.setProperty('--viewport-height', `${newHeight}px`);
+                    });                    
 
                     // Add share button if in Telegram
                     if (tg?.platform !== 'unknown') {
