@@ -1232,14 +1232,7 @@ function loadGame() {
                     ...parsed.profile,    // Загруженные данные
                 };
             }
-        }
-    } catch (e) {
-        console.error("Ошибка загрузки сохранения:", e);
-        const backupName = 'tree-game-save-corrupted-' + Date.now();
-        localStorage.setItem(backupName, localStorage.getItem('tree-game-save'));
-        localStorage.removeItem('tree-game-save');
-    }
-}  
+            
             if (parsed && typeof parsed === 'object') {
                 // Основные данные игры
                 gameState.level = parsed.level || 1;
@@ -1251,6 +1244,7 @@ function loadGame() {
                 gameState.planted = parsed.planted || 0;
                 gameState.nextLevelXP = parsed.nextLevelXP || 10;
                 gameState.activeTreeSlot = parsed.activeTreeSlot || null;
+                
                 
                 // Слоты сада
                 if (parsed.gardenSlots) {
@@ -1264,7 +1258,15 @@ function loadGame() {
                         }
                     }
                 }
-                
+
+                        } catch (e) {
+                            console.error("Ошибка загрузки сохранения:", e);
+                            const backupName = 'tree-game-save-corrupted-' + Date.now();
+                            localStorage.setItem(backupName, localStorage.getItem('tree-game-save'));
+                            localStorage.removeItem('tree-game-save');
+                        }
+                    }
+
                 // Профиль
                 if (parsed.profile) {
                     gameState.profile.username = parsed.profile.username || CONSTANTS.DEFAULT_USERNAME;
