@@ -858,7 +858,6 @@ function renderSkills() {
             (!organized.required || quickHands.currentLevel >= organized.required.level);
         elements.upgradeOrganized.disabled = !canUpgrade;
     }
-} // ← вот она, закрывающая скобка!
 
 function upgradeSkill(category, skillName) {
     const skillCategory = gameState.skills[category];
