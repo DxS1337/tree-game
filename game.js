@@ -865,28 +865,28 @@ function renderSkills() {
     // Inventory skills
     const exemFasterMatch = gameState.skills.inventory.upgrades.exemFasterMatch;
     if (elements.upgradeExem) {
-        elements.upgradeExem.disabled = gameState.skills.inventory.points < exemFasterMatch.cost || 
+        elements.upgradeExem.disabled = gameState.skills.inventory.points < exemFasterMatch.cost ||
             exemFasterMatch.currentLevel >= exemFasterMatch.maxLevel;
     }
 
     const quickHands = gameState.skills.inventory.upgrades.quickHands;
-if (elements.upgradeQuickHands) {
-    elements.upgradeQuickHands.textContent = `Улучшить`;  // Исправлено имя элемента
-    const canUpgrade = gameState.skills.inventory.points >= quickHands.cost && 
-                      quickHands.currentLevel < quickHands.maxLevel &&
-                      (!quickHands.required || exemFasterMatch.currentLevel >= quickHands.required.level);
-    elements.upgradeQuickHands.disabled = !canUpgrade;
-}
+    if (elements.upgradeQuickHands) {
+        elements.upgradeQuickHands.textContent = `Улучшить`;
+        const canUpgrade = gameState.skills.inventory.points >= quickHands.cost &&
+            quickHands.currentLevel < quickHands.maxLevel &&
+            (!quickHands.required || exemFasterMatch.currentLevel >= quickHands.required.level);
+        elements.upgradeQuickHands.disabled = !canUpgrade;
+    }
 
     const organized = gameState.skills.inventory.upgrades.organized;
-if (elements.upgradeOrganized) {
-    elements.upgradeOrganized.textContent = `Улучшить`;  // Исправлено имя элемента
-    const canUpgrade = gameState.skills.inventory.points >= organized.cost && 
-                      organized.currentLevel < organized.maxLevel &&
-                      (!organized.required || quickHands.currentLevel >= organized.required.level);
-    elements.upgradeOrganized.disabled = !canUpgrade;
+    if (elements.upgradeOrganized) {
+        elements.upgradeOrganized.textContent = `Улучшить`;
+        const canUpgrade = gameState.skills.inventory.points >= organized.cost &&
+            organized.currentLevel < organized.maxLevel &&
+            (!organized.required || quickHands.currentLevel >= organized.required.level);
+        elements.upgradeOrganized.disabled = !canUpgrade;
     }
-}
+} // ← вот она, закрывающая скобка!
 
 function upgradeSkill(category, skillName) {
     const skillCategory = gameState.skills[category];
