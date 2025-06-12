@@ -116,7 +116,7 @@ const gameState = {
 // DOM elements
 const elements = {
     loadingScreen: document.getElementById('loading-screen'),
-    loadingProgress: document.querySelector('.loading-progress'), // исправили
+    loadingProgress: document.getElementById('loading-progress'),
     gameApp: document.querySelector('.game-app'),
     energyDisplay: document.getElementById('energy'),
     maxEnergyDisplay: document.getElementById('max-energy'),
@@ -198,17 +198,17 @@ function updateProgress(step) {
     const progressPercent = Math.min(100, Math.floor(currentProgress));
     elements.loadingProgress.textContent = `${progressPercent}%`;
     
-if (progressPercent >= 100) {
-    setTimeout(() => {
-        elements.loadingScreen.style.opacity = '0';
+    if (progressPercent >= 100) {
         setTimeout(() => {
-            elements.loadingScreen.style.display = 'none';
-            document.body.classList.add('loaded');
-            elements.gameApp.classList.add('loaded');
-        }, 500);
-    }, 300);
+            elements.loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                elements.loadingScreen.style.display = 'none';
+                document.body.classList.add('loaded');
+                elements.gameApp.classList.add('loaded');
+            }, 500);
+        }, 300);
+    }
 }
-
 // Apply theme function
 function applyTheme() {
     try {
@@ -1872,9 +1872,7 @@ const game2048 = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    const themeToggle = document.getElementById('theme-toggle');
-    if (themeToggle) {
+
         // Установить положение тумблера по saved теме
         themeToggle.checked = (gameState.profile?.themeMode === 'dark');
         themeToggle.addEventListener('change', function() {
@@ -1883,4 +1881,13 @@ document.addEventListener('DOMContentLoaded', () => {
             applyTheme();
         });
     }
+});
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (elements.loadingScreen) {
+        elements.loadingScreen.style.display = 'flex';
+    }
+    initGame();
 });
