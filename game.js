@@ -1,4 +1,4 @@
- 'use strict';
+'use strict';
 
 // Telegram WebApp initialization
 let tg = {
@@ -41,120 +41,83 @@ const CONSTANTS = {
     VIEWPORT_HEIGHT: tg?.WebApp?.viewportHeight || window.innerHeight
 };
 
-// Game state (расширенная инициализация)
-'use strict';
-
-// ... (ваш код выше)
-
+// Game state
 const gameState = {
     profile: {
-        username: "Игрок",
+        username: CONSTANTS.DEFAULT_USERNAME,
         achievements: [],
         themeMode: "auto",
     },
+    lastSave: 0,
     level: 1,
     xp: 0,
-    nextLevelXP: 10,
     energy: 5,
     maxEnergy: 5,
     coins: 0,
     target: 1,
     planted: 0,
+    nextLevelXP: 10,
     activeTreeSlot: null,
     gardenSlots: {
         1: { unlocked: true, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
         2: { unlocked: false, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
         3: { unlocked: false, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
+        4: { unlocked: false, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
     },
     upgrades: {
-        waterEfficiency: { name: "Эффективность полива", description: "", currentLevel: 0, maxLevel: 5, price: 100 },
-        plantEfficiency: { name: "Эффективность посадки", description: "", currentLevel: 0, maxLevel: 5, price: 150 },
-        coinMultiplier: { name: "Множитель монет", description: "", currentLevel: 0, maxLevel: 5, price: 200 },
-        plantReward: { name: "Бонус за посадку", description: "", currentLevel: 0, maxLevel: 5, price: 100 },
-        energyCap: { name: "Запас энергии", description: "", currentLevel: 0, maxLevel: 5, price: 150 },
-        energyRegen: { name: "Восстановление энергии", description: "", currentLevel: 0, maxLevel: 1, price: 250 },
-        premiumDiscount: { name: "Скидка на премиум", description: "", currentLevel: 0, maxLevel: 3, price: 300 },
-        dailyBonus: { name: "Бонус за ежедневный сундук", description: "", currentLevel: 0, maxLevel: 3, price: 200 },
+        waterEfficiency: { name: "Эффективность полива", description: "Снижает стоимость энергии при поливе.", currentLevel: 0, maxLevel: 5, price: 100 },
+        coinMultiplier: { name: "Множитель монет", description: "Больше монет за действия.", currentLevel: 0, maxLevel: 5, price: 500 },
+        plantEfficiency: { name: "Эффективность посадки", description: "Снижает стоимость энергии при посадке.", currentLevel: 0, maxLevel: 5, price: 150 },
+        plantReward: { name: "Бонус за посадку", description: "Больше монет за посадку дерева.", currentLevel: 0, maxLevel: 5, price: 200 },
+        energyCap: { name: "Максимум энергии", description: "Увеличивает максимум энергии.", currentLevel: 0, maxLevel: 10, price: 1000 },
+        dailyBonus: { name: "Бонус за сундуки", description: "Больше наград за сундуки.", currentLevel: 0, maxLevel: 5, price: 800 },
+        premiumDiscount: { name: "Скидка на премиум", description: "Снижает цену премиум-сундука.", currentLevel: 0, maxLevel: 3, price: 1200 },
+        energyRegen: { name: "Восстановление энергии", description: "Энергия восстанавливается быстрее.", currentLevel: 0, maxLevel: 1, price: 2500 }
     },
     skills: {
         inventory: {
             points: 0,
             upgrades: {
-                exemFasterMatch: { name: "Быстрое сопоставление", currentLevel: 0, maxLevel: 5, cost: 1, required: null },
-                quickHands: { name: "Ловкие руки", currentLevel: 0, maxLevel: 3, cost: 2, required: { skill: "exemFasterMatch", level: 2 } },
-                organized: { name: "Организованное пространство", currentLevel: 0, maxLevel: 4, cost: 3, required: { skill: "quickHands", level: 2 } },
+                exemFasterMatch: { name: "Быстрое сопоставление", currentLevel: 0, maxLevel: 5, cost: 1 },
+                quickHands: { name: "Ловкие руки", currentLevel: 0, maxLevel: 3, cost: 2, required: { skill: 'exemFasterMatch', level: 2 } },
+                organized: { name: "Организованное пространство", currentLevel: 0, maxLevel: 4, cost: 3, required: { skill: 'quickHands', level: 2 } }
             }
-        },
+        }
     },
     chests: {
         daily: {
             lastOpened: 0,
-            cooldown: 24 * 60 * 60 * 1000,
+            cooldown: CONSTANTS.DAILY_CHEST_COOLDOWN,
             dropRates: {
-                common: { chance: 70, rarity: "common", emoji: "🪙", bonus: { coins: 10 }, name: "Монеты", description: "Обычная награда" },
-                rare: { chance: 20, rarity: "rare", emoji: "⚡", bonus: { energy: 2 }, name: "Энергия", description: "Редкая награда" },
-                epic: { chance: 10, rarity: "epic", emoji: "⭐", bonus: { xp: 10 }, name: "Опыт", description: "Эпическая награда" },
+                common: { emoji: "🍀", name: "Обычная награда", description: "Немного монет.", chance: 70, rarity: "common", bonus: { coins: 10 } },
+                rare: { emoji: "🎁", name: "Редкая награда", description: "Много монет и XP.", chance: 25, rarity: "rare", bonus: { coins: 30, xp: 10 } },
+                epic: { emoji: "💎", name: "Эпическая награда", description: "Очень много монет, XP и энергии.", chance: 5, rarity: "epic", bonus: { coins: 50, xp: 25, energy: 2 } }
             }
         },
         premium: {
             pityCounter: 0,
-            price: 200,
+            price: CONSTANTS.PREMIUM_CHEST_PRICE,
             dropRates: {
-                common: { chance: 60, rarity: "common", emoji: "🪙", bonus: { coins: 50 }, name: "Монеты", description: "Обычная награда" },
-                rare: { chance: 25, rarity: "rare", emoji: "⚡", bonus: { energy: 5 }, name: "Энергия", description: "Редкая награда" },
-                epic: { chance: 10, rarity: "epic", emoji: "⭐", bonus: { xp: 30 }, name: "Опыт", description: "Эпическая награда" },
-                mythic: { chance: 5, rarity: "mythic", emoji: "💎", bonus: { discount: 0.2 }, name: "Скидка", description: "Мифическая награда" },
+                rare: { emoji: "🎁", name: "Редкая награда", description: "Много монет и XP.", chance: 50, rarity: "rare", bonus: { coins: 60, xp: 20 } },
+                epic: { emoji: "💎", name: "Эпическая награда", description: "Очень много монет, XP и энергии.", chance: 40, rarity: "epic", bonus: { coins: 100, xp: 40, energy: 3 } },
+                mythic: { emoji: "🌟", name: "Мифическая награда", description: "Скидка в магазине и уйма наград.", chance: 10, rarity: "mythic", bonus: { coins: 200, xp: 100, discount: 0.25 } }
             }
         }
     },
     achievementsData: [
-        { id: "first-tree", title: "Первое дерево", description: "Посади своё первое дерево", icon: "🌱", unlocked: false },
-        { id: "trader", title: "Торговец", description: "Получить 100 монет", icon: "🪙", unlocked: false },
-        { id: "gardener", title: "Садовник", description: "Разблокировать все слоты", icon: "🌻", unlocked: false },
-        { id: "expert", title: "Эксперт", description: "Достигнуть 10 уровня", icon: "⭐", unlocked: false },
-        { id: "collector", title: "Коллекционер", description: "Открыть все типы наград в ежедневном сундуке", icon: "🎁", unlocked: false },
-    ],
-    lastSave: 0,
-    energyChanged: false,
-    coinsChanged: false,
+        { id: 'first-tree', icon: '🌱', title: 'Первое дерево', description: 'Посади первое дерево.', unlocked: false },
+        { id: 'trader', icon: '🪙', title: 'Торговец', description: 'Накопи 100 монет.', unlocked: false },
+        { id: 'gardener', icon: '🌻', title: 'Садовник', description: 'Разблокируй все слоты сада.', unlocked: false },
+        { id: 'expert', icon: '⭐', title: 'Эксперт', description: 'Достигни 10 уровня.', unlocked: false },
+        { id: 'collector', icon: '🎁', title: 'Коллекционер', description: 'Открой все типы сундуков.', unlocked: false }
+    ]
 };
+
 // DOM elements
 const elements = {
     loadingScreen: document.getElementById('loading-screen'),
     loadingProgress: document.querySelector('.loading-progress'),
     gameApp: document.querySelector('.game-app'),
-    gardenSlots: document.getElementById('garden-slots'),
-    rewardModal: document.getElementById('reward-modal'),
-    rewardEmoji: document.getElementById('reward-emoji'),
-    rewardName: document.getElementById('reward-name'),
-    rewardDescription: document.getElementById('reward-description'),
-    rewardBonus: document.getElementById('reward-bonus'),
-    notification: document.getElementById('notification'),
-    waterBtn: document.getElementById('water-btn'),
-    plantBtn: document.getElementById('plant-btn'),
-    skillsNav: document.getElementById('skills-nav'),
-    shopNav: document.getElementById('shop-nav'),
-    homeNav: document.getElementById('home-nav'),
-    profileNav: document.getElementById('profile-nav'),
-    upgradeExem: document.getElementById('upgrade-exem'),
-    upgradeQuickHands: document.getElementById('upgrade-quick-hands'),
-    upgradeOrganized: document.getElementById('upgrade-organized'),
-    adminBtn: document.getElementById('admin-btn'),
-    adminPanel: document.getElementById('admin-panel'),
-    resetBtn: document.getElementById('reset-btn'),
-    applyBtn: document.getElementById('apply-btn'),
-    addBlockBtn: document.getElementById('add-block-btn'),
-    addTileBtn: document.getElementById('add-tile-btn'),
-    setTileValue: document.getElementById('set-tile-value'),
-    tileValueDisplay: document.getElementById('tile-value-display'),
-    chestMenuBtn: document.getElementById('chest-menu-btn'),
-    chestMenu: document.getElementById('chest-menu'),
-    game2048Card: document.getElementById('game-2048'),
-    game2048Restart: document.getElementById('game-2048-restart'),
-    game2048Close: document.getElementById('game-2048-close'),
-    game2048Container: document.getElementById('game-2048-container'),
-    game2048Board: document.getElementById('game-2048-board'),
-    game2048Score: document.getElementById('game-2048-score'),
     energyDisplay: document.getElementById('energy'),
     maxEnergyDisplay: document.getElementById('max-energy'),
     coins: document.getElementById('coins'),
@@ -165,15 +128,48 @@ const elements = {
     nextLevel: document.getElementById('next-level'),
     energyBar: document.getElementById('energy-bar'),
     tree: document.getElementById('tree'),
+    waterBtn: document.getElementById('water-btn'),
+    plantBtn: document.getElementById('plant-btn'),
     username: document.getElementById('username'),
+    gardenSlots: document.getElementById('garden-slots'),
+    notification: document.getElementById('notification'),
+    skillsNav: document.getElementById('skills-nav'),
+    shopNav: document.getElementById('shop-nav'),
+    homeNav: document.getElementById('home-nav'),
+    profileNav: document.getElementById('profile-nav'),
+    gamepadNav: document.getElementById('gamepad-nav'),
+    upgradeExem: document.getElementById('upgrade-exem'),
+    upgradeQuickHands: document.getElementById('upgrade-quick-hands'),
+    upgradeOrganized: document.getElementById('upgrade-organized'),
     shopItems: document.getElementById('shop-items'),
     allAchievements: document.getElementById('all-achievements'),
     unlockedAchievements: document.getElementById('unlocked-achievements'),
+    dailyTimer: document.getElementById('daily-timer'),
+    chestMenuBtn: document.getElementById('chest-menu-btn'),
+    chestMenu: document.getElementById('chest-menu'),
+    rewardModal: document.getElementById('reward-modal'),
+    rewardEmoji: document.getElementById('reward-emoji'),
+    rewardName: document.getElementById('reward-name'),
+    rewardDescription: document.getElementById('reward-description'),
+    rewardBonus: document.getElementById('reward-bonus'),
+    adminBtn: document.getElementById('admin-btn'),
+    adminPanel: document.getElementById('admin-panel'),
+    resetBtn: document.getElementById('reset-btn'),
     setLevel: document.getElementById('set-level'),
     setXp: document.getElementById('set-xp'),
     setEnergy: document.getElementById('set-energy'),
     setCoins: document.getElementById('set-coins'),
-    dailyTimer: document.getElementById('daily-timer'),
+    addTileBtn: document.getElementById('add-tile-btn'),
+    addBlockBtn: document.getElementById('add-block-btn'),
+    applyBtn: document.getElementById('apply-btn'),
+    setTileValue: document.getElementById('set-tile-value'),
+    tileValueDisplay: document.getElementById('tile-value-display'),
+    game2048Card: document.getElementById('game-2048'),
+    game2048Container: document.getElementById('game-2048-container'),
+    game2048Board: document.getElementById('game-2048-board'),
+    game2048Score: document.getElementById('game-2048-score'),
+    game2048Restart: document.getElementById('game-2048-restart'),
+    game2048Close: document.getElementById('game-2048-close'),
 };
 
 // Notification queue
