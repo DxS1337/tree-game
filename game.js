@@ -233,7 +233,12 @@ function addShareButton() {
         document.body.appendChild(shareBtn);
     }
 }
-
+        function initAchievements() {
+            if (!gameState.achievementsData) return;
+            gameState.achievementsData.forEach(ach => {
+                ach.unlocked = gameState.profile.achievements.includes(ach.id);
+            });
+        }
 // Initialize game
 function initGame() {
     updateProgress(LOADING_STEPS.INIT);
