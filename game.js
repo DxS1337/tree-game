@@ -170,6 +170,8 @@ const elements = {
     game2048Score: document.getElementById('game-2048-score'),
     game2048Restart: document.getElementById('game-2048-restart'),
     game2048Close: document.getElementById('game-2048-close'),
+    console.log('elements:', elements);
+
 };
 // Notification queue
 const notificationQueue = [];
