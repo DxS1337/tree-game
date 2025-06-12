@@ -1879,8 +1879,6 @@ const game2048 = {
     }
 });
 
-
-
 document.addEventListener('DOMContentLoaded', () => {
     if (elements.loadingScreen) {
         elements.loadingScreen.style.display = 'flex';
