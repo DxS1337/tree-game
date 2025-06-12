@@ -173,6 +173,7 @@ const elements = {
 };
 
  console.log('elements:', elements);
+
 // Notification queue
 const notificationQueue = [];
 let isNotificationShowing = false;
