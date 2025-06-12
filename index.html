@@ -14,8 +14,6 @@
             height: var(--viewport-height);
             overflow: hidden;
         }
-        
-        /* Fix for iOS viewport */
         @supports (-webkit-touch-callout: none) {
             .loading-screen {
                 position: absolute;
@@ -29,7 +27,7 @@
         <div class="loading-content">
             <div class="loading-spinner"></div>
             <div class="loading-text">Загрузка игры...</div>
-            <div class="loading-progress">0%</div>
+            <div class="loading-progress" id="loading-progress">0%</div>
         </div>
     </div>
 
@@ -115,17 +113,7 @@
                 <div class="garden-container">
                     <h3>🌻 Мой сад</h3>
                     <div class="garden-slots" id="garden-slots">
-                        <!-- Базовый слот (бесплатный) -->
-                        <div class="garden-slot" data-slot="1">
-                            <div class="tree-display">🌱</div>
-                            <button class="btn btn-small plant-slot-btn">Посадить (0 монет)</button>
-                        </div>
-                        
-                        <!-- Дополнительные платные слоты -->
-                        <div class="garden-slot locked" data-slot="2">
-                            <div class="empty-slot">🔒</div>
-                            <button class="btn btn-small unlock-slot-btn">Разблокировать (1000 монет)</button>
-                        </div>
+                        <!-- слоты появятся динамически -->
                     </div>
                 </div>
 
@@ -150,8 +138,6 @@
                     <h2>⚡ Навыки</h2>
                     <div class="skills-scrollable">
                         <div class="skill-points-display">Очки навыков: <span id="skill-points">0</span></div>
-                        
-                        <!-- Существующие навыки -->
                         <div class="skill-category">
                             <div class="skill-item">
                                 <div class="skill-info">
