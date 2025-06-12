@@ -47,77 +47,76 @@ const CONSTANTS = {
 // ... (ваш код выше)
 
 const gameState = {
-  profile: {
-    username: "Игрок",
-    achievements: [],
-    themeMode: "auto",
-  },
-  level: 1,
-  xp: 0,
-  energy: 5,
-  maxEnergy: 5,
-  coins: 0,
-  target: 1,
-  planted: 0,
-  nextLevelXP: 10,
-  activeTreeSlot: null,
-  lastSave: 0,
-  energyChanged: false,
-  coinsChanged: false,
-  gardenSlots: {
-    1: { unlocked: true, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
-    2: { unlocked: false, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
-    3: { unlocked: false, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
-    4: { unlocked: false, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
-  },
-  upgrades: {
-    energyCap: { name: "Макс. энергия", description: "Увеличивает максимум энергии", price: 100, currentLevel: 0, maxLevel: 5 },
-    coinMultiplier: { name: "Больше монет", description: "Увеличивает количество монет за действия", price: 250, currentLevel: 0, maxLevel: 5 },
-    plantReward: { name: "Бонус за посадку", description: "Дополнительные монеты за посадку", price: 150, currentLevel: 0, maxLevel: 5 },
-    plantEfficiency: { name: "Эффективность посадки", description: "Снижает стоимость энергии при посадке", price: 200, currentLevel: 0, maxLevel: 5 },
-    waterEfficiency: { name: "Эффективность полива", description: "Снижает стоимость энергии при поливе", price: 200, currentLevel: 0, maxLevel: 5 },
-    premiumDiscount: { name: "Скидка на премиум", description: "Снижает цену премиум сундука", price: 400, currentLevel: 0, maxLevel: 5 },
-    dailyBonus: { name: "Бонус к ежедневке", description: "Увеличивает награду ежедневного сундука", price: 250, currentLevel: 0, maxLevel: 5 },
-    energyRegen: { name: "Восстановление энергии", description: "Ускоряет восстановление энергии", price: 300, currentLevel: 0, maxLevel: 1 },
-  },
-  skills: {
-    inventory: {
-      points: 0,
-      upgrades: {
-        exemFasterMatch: { name: "Быстрое сопоставление", cost: 1, currentLevel: 0, maxLevel: 5 },
-        quickHands: { name: "Ловкие руки", cost: 2, currentLevel: 0, maxLevel: 3, required: { skill: "exemFasterMatch", level: 3 } },
-        organized: { name: "Организованное пространство", cost: 3, currentLevel: 0, maxLevel: 4, required: { skill: "quickHands", level: 2 } },
-      }
-    }
-  },
-  chests: {
-    daily: {
-      lastOpened: 0,
-      cooldown: 24 * 60 * 60 * 1000,
-      dropRates: {
-        common: { emoji: "🍀", name: "Обычный", description: "10 XP", bonus: { xp: 10 }, rarity: "common", chance: 70 },
-        uncommon: { emoji: "💎", name: "Необычный", description: "50 монет", bonus: { coins: 50 }, rarity: "uncommon", chance: 25 },
-        rare: { emoji: "⚡", name: "Редкий", description: "1 энергия", bonus: { energy: 1 }, rarity: "rare", chance: 5 },
-      }
+    profile: {
+        username: "Игрок",
+        achievements: [],
+        themeMode: "auto",
     },
-    premium: {
-      pityCounter: 0,
-      price: 200,
-      dropRates: {
-        rare: { emoji: "⚡", name: "Редкий", description: "3 энергии", bonus: { energy: 3 }, rarity: "rare", chance: 40 },
-        epic: { emoji: "🌟", name: "Эпик", description: "200 монет", bonus: { coins: 200 }, rarity: "epic", chance: 35 },
-        legendary: { emoji: "👑", name: "Легендарный", description: "Скидка 10% в магазине", bonus: { discount: 0.1 }, rarity: "legendary", chance: 20 },
-        mythic: { emoji: "🦄", name: "Мифический", description: "100 XP", bonus: { xp: 100 }, rarity: "mythic", chance: 5 },
-      }
-    }
-  },
-  achievementsData: [
-    { id: "first-tree", icon: "🌱", title: "Первое дерево", description: "Посадите первое дерево", unlocked: false },
-    { id: "trader", icon: "🪙", title: "Трейдер", description: "Накопите 100 монет", unlocked: false },
-    { id: "gardener", icon: "🌳", title: "Садовник", description: "Откройте все слоты сада", unlocked: false },
-    { id: "collector", icon: "🎁", title: "Коллекционер", description: "Откройте все ежедневные награды", unlocked: false },
-    { id: "expert", icon: "🏆", title: "Эксперт", description: "Достигните 10 уровня", unlocked: false },
-  ]
+    level: 1,
+    xp: 0,
+    nextLevelXP: 10,
+    energy: 5,
+    maxEnergy: 5,
+    coins: 0,
+    target: 1,
+    planted: 0,
+    activeTreeSlot: null,
+    gardenSlots: {
+        1: { unlocked: true, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
+        2: { unlocked: false, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
+        3: { unlocked: false, tree: null, lastWatered: null, growthStage: 0, xp: 0 },
+    },
+    upgrades: {
+        waterEfficiency: { name: "Эффективность полива", description: "", currentLevel: 0, maxLevel: 5, price: 100 },
+        plantEfficiency: { name: "Эффективность посадки", description: "", currentLevel: 0, maxLevel: 5, price: 150 },
+        coinMultiplier: { name: "Множитель монет", description: "", currentLevel: 0, maxLevel: 5, price: 200 },
+        plantReward: { name: "Бонус за посадку", description: "", currentLevel: 0, maxLevel: 5, price: 100 },
+        energyCap: { name: "Запас энергии", description: "", currentLevel: 0, maxLevel: 5, price: 150 },
+        energyRegen: { name: "Восстановление энергии", description: "", currentLevel: 0, maxLevel: 1, price: 250 },
+        premiumDiscount: { name: "Скидка на премиум", description: "", currentLevel: 0, maxLevel: 3, price: 300 },
+        dailyBonus: { name: "Бонус за ежедневный сундук", description: "", currentLevel: 0, maxLevel: 3, price: 200 },
+    },
+    skills: {
+        inventory: {
+            points: 0,
+            upgrades: {
+                exemFasterMatch: { name: "Быстрое сопоставление", currentLevel: 0, maxLevel: 5, cost: 1, required: null },
+                quickHands: { name: "Ловкие руки", currentLevel: 0, maxLevel: 3, cost: 2, required: { skill: "exemFasterMatch", level: 2 } },
+                organized: { name: "Организованное пространство", currentLevel: 0, maxLevel: 4, cost: 3, required: { skill: "quickHands", level: 2 } },
+            }
+        },
+    },
+    chests: {
+        daily: {
+            lastOpened: 0,
+            cooldown: 24 * 60 * 60 * 1000,
+            dropRates: {
+                common: { chance: 70, rarity: "common", emoji: "🪙", bonus: { coins: 10 }, name: "Монеты", description: "Обычная награда" },
+                rare: { chance: 20, rarity: "rare", emoji: "⚡", bonus: { energy: 2 }, name: "Энергия", description: "Редкая награда" },
+                epic: { chance: 10, rarity: "epic", emoji: "⭐", bonus: { xp: 10 }, name: "Опыт", description: "Эпическая награда" },
+            }
+        },
+        premium: {
+            pityCounter: 0,
+            price: 200,
+            dropRates: {
+                common: { chance: 60, rarity: "common", emoji: "🪙", bonus: { coins: 50 }, name: "Монеты", description: "Обычная награда" },
+                rare: { chance: 25, rarity: "rare", emoji: "⚡", bonus: { energy: 5 }, name: "Энергия", description: "Редкая награда" },
+                epic: { chance: 10, rarity: "epic", emoji: "⭐", bonus: { xp: 30 }, name: "Опыт", description: "Эпическая награда" },
+                mythic: { chance: 5, rarity: "mythic", emoji: "💎", bonus: { discount: 0.2 }, name: "Скидка", description: "Мифическая награда" },
+            }
+        }
+    },
+    achievementsData: [
+        { id: "first-tree", title: "Первое дерево", description: "Посади своё первое дерево", icon: "🌱", unlocked: false },
+        { id: "trader", title: "Торговец", description: "Получить 100 монет", icon: "🪙", unlocked: false },
+        { id: "gardener", title: "Садовник", description: "Разблокировать все слоты", icon: "🌻", unlocked: false },
+        { id: "expert", title: "Эксперт", description: "Достигнуть 10 уровня", icon: "⭐", unlocked: false },
+        { id: "collector", title: "Коллекционер", description: "Открыть все типы наград в ежедневном сундуке", icon: "🎁", unlocked: false },
+    ],
+    lastSave: 0,
+    energyChanged: false,
+    coinsChanged: false,
 };
 // DOM elements
 const elements = {
@@ -150,7 +149,6 @@ const elements = {
     tileValueDisplay: document.getElementById('tile-value-display'),
     chestMenuBtn: document.getElementById('chest-menu-btn'),
     chestMenu: document.getElementById('chest-menu'),
-    dailyTimer: document.getElementById('daily-timer'),
     game2048Card: document.getElementById('game-2048'),
     game2048Restart: document.getElementById('game-2048-restart'),
     game2048Close: document.getElementById('game-2048-close'),
@@ -175,6 +173,7 @@ const elements = {
     setXp: document.getElementById('set-xp'),
     setEnergy: document.getElementById('set-energy'),
     setCoins: document.getElementById('set-coins'),
+    dailyTimer: document.getElementById('daily-timer'),
 };
 
 // Notification queue
