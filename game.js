@@ -1,6 +1,6 @@
-// Telegram WebApp initialization
 'use strict';
 
+// Telegram WebApp initialization
 let tg = {
     WebApp: {
         platform: 'unknown',
@@ -11,7 +11,6 @@ let tg = {
     }
 };
 
-
 if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
     tg = Telegram.WebApp;
     tg.expand();
@@ -20,7 +19,6 @@ if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
 } else {
     console.warn('Telegram WebApp не обнаружен. Режим совместимости.');
 }
-
 
 // Game constants
 const CONSTANTS = {
@@ -43,12 +41,12 @@ const CONSTANTS = {
     VIEWPORT_HEIGHT: tg?.WebApp?.viewportHeight || window.innerHeight
 };
 
-// Game state (unchanged)
+// Game state
 const gameState = {
     profile: {
         username: "Игрок",
         achievements: [],
-        themeMode: "auto", // Добавьте значение по умолчанию
+        themeMode: "auto",
     },
 };
 
@@ -67,11 +65,9 @@ let isNotificationShowing = false;
 const elements = {
     loadingScreen: document.getElementById('loading-screen'),
     loadingProgress: document.getElementById('loading-progress'),
-    // ... остальные элементы
 };
 
 if (!elements.loadingScreen) console.error('Loading screen element not found');
-
 
 // Loading steps
 const LOADING_STEPS = {
@@ -108,7 +104,7 @@ function updateProgress(step) {
 function applyTheme() {
     try {
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const themeMode = gameState.profile?.themeMode || 'auto'; // Запасное значение
+        const themeMode = gameState.profile?.themeMode || 'auto';
         
         if (themeMode === 'dark' || (themeMode === 'auto' && prefersDark)) {
             document.body.classList.add('dark-theme');
@@ -119,6 +115,7 @@ function applyTheme() {
         console.error('Ошибка в applyTheme:', error);
     }
 }
+
 // Add share button for Telegram
 function addShareButton() {
     if (tg?.platform !== 'unknown' && !document.getElementById('share-btn')) {
@@ -174,38 +171,35 @@ function initGame() {
                     updateProgress(LOADING_STEPS.FINISH);
                     
                     // Telegram specific initialization
-                        if (CONSTANTS.IS_TELEGRAM) {
-                            const viewportHeight = tg.viewportHeight || window.innerHeight;
-                            document.documentElement.style.setProperty('--viewport-height', `${viewportHeight}px`);
-                            document.body.classList.add('telegram-app');
-                        }
-                                                
-                        // Disable zoom on iOS
-                        document.addEventListener('touchmove', function(e) {
-                            if (e.scale !== 1) { e.preventDefault(); }
-                        }, { passive: false });
+                    if (CONSTANTS.IS_TELEGRAM) {
+                        const viewportHeight = tg.viewportHeight || window.innerHeight;
+                        document.documentElement.style.setProperty('--viewport-height', `${viewportHeight}px`);
+                        document.body.classList.add('telegram-app');
                         
                         // Handle viewport changes
-                        Telegram.WebApp.onEvent('viewportChanged', () => {
-                            const newHeight = Telegram.WebApp.viewportHeight;
-                            document.documentElement.style.setProperty('--viewport-height', `${newHeight}px`);
-                        });
-                        
-                        // iOS optimizations
-                        if (tg.platform === 'ios') {
-                            document.body.style.height = `${tg.viewportHeight}px`;
-                            window.addEventListener('resize', () => {
-                                document.body.style.height = `${tg.viewportHeight}px`;
+                        try {
+                            tg.onEvent('viewportChanged', () => {
+                                const newHeight = tg.viewportHeight;
+                                document.documentElement.style.setProperty('--viewport-height', `${newHeight}px`);
                             });
+                        } catch (e) {
+                            console.error('Ошибка при установке обработчика viewportChanged:', e);
                         }
                     }
                     
-                                        if (CONSTANTS.IS_TELEGRAM) {
-                    tg.onEvent('viewportChanged', () => {
-                        const newHeight = tg.viewportHeight;
-                        document.documentElement.style.setProperty('--viewport-height', `${newHeight}px`);
-                    });                    
-
+                    // Disable zoom on iOS
+                    document.addEventListener('touchmove', function(e) {
+                        if (e.scale !== 1) { e.preventDefault(); }
+                    }, { passive: false });
+                    
+                    // iOS optimizations
+                    if (tg.platform === 'ios') {
+                        document.body.style.height = `${tg.viewportHeight}px`;
+                        window.addEventListener('resize', () => {
+                            document.body.style.height = `${tg.viewportHeight}px`;
+                        });
+                    }
+                    
                     // Add share button if in Telegram
                     if (tg?.platform !== 'unknown') {
                         addShareButton();
@@ -1228,8 +1222,8 @@ function loadGame() {
             // Восстановите profile, если он есть в сохранении
             if (parsed.profile) {
                 gameState.profile = {
-                    ...gameState.profile, // Значения по умолчанию
-                    ...parsed.profile,    // Загруженные данные
+                    ...gameState.profile,
+                    ...parsed.profile,
                 };
             }
             
@@ -1245,7 +1239,6 @@ function loadGame() {
                 gameState.nextLevelXP = parsed.nextLevelXP || 10;
                 gameState.activeTreeSlot = parsed.activeTreeSlot || null;
                 
-                
                 // Слоты сада
                 if (parsed.gardenSlots) {
                     for (const [slotNumber, slotData] of Object.entries(parsed.gardenSlots)) {
@@ -1258,15 +1251,7 @@ function loadGame() {
                         }
                     }
                 }
-
-                        } catch (e) {
-                            console.error("Ошибка загрузки сохранения:", e);
-                            const backupName = 'tree-game-save-corrupted-' + Date.now();
-                            localStorage.setItem(backupName, localStorage.getItem('tree-game-save'));
-                            localStorage.removeItem('tree-game-save');
-                        }
-                    }
-
+                
                 // Профиль
                 if (parsed.profile) {
                     gameState.profile.username = parsed.profile.username || CONSTANTS.DEFAULT_USERNAME;
@@ -1816,6 +1801,7 @@ const game2048 = {
         if (victoryScreen) victoryScreen.remove();
     }
 };
+
 document.addEventListener('DOMContentLoaded', () => {
     if (elements.loadingScreen) {
         elements.loadingScreen.style.display = 'flex';
