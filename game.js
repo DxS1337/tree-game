@@ -1893,8 +1893,14 @@ const game2048 = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (elements.loadingScreen) {
-        elements.loadingScreen.style.display = 'flex';
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        // Установить положение тумблера по saved теме
+        themeToggle.checked = (gameState.profile?.themeMode === 'dark');
+        themeToggle.addEventListener('change', function() {
+            gameState.profile.themeMode = this.checked ? 'dark' : 'light';
+            saveGame();
+            applyTheme();
+        });
     }
-    initGame();
 });
