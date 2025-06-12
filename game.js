@@ -233,7 +233,7 @@ function applyTheme() {
         }
 // Initialize game
 function initGame() {
-    updateProgress(LOADING_STEPS.INIT);
+    updateProgress(100);
     
     setTimeout(() => {
         applyTheme();
