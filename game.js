@@ -885,6 +885,7 @@ if (elements.upgradeOrganized) {
                       organized.currentLevel < organized.maxLevel &&
                       (!organized.required || quickHands.currentLevel >= organized.required.level);
     elements.upgradeOrganized.disabled = !canUpgrade;
+    }
 }
 
 function upgradeSkill(category, skillName) {
