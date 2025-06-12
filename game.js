@@ -198,16 +198,15 @@ function updateProgress(step) {
     const progressPercent = Math.min(100, Math.floor(currentProgress));
     elements.loadingProgress.textContent = `${progressPercent}%`;
     
-    if (progressPercent >= 100) {
+if (progressPercent >= 100) {
+    setTimeout(() => {
+        elements.loadingScreen.style.opacity = '0';
         setTimeout(() => {
-            elements.loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                elements.loadingScreen.style.display = 'none';
-                document.body.classList.add('loaded');
-                elements.gameApp.classList.add('loaded');
-            }, 500);
-        }, 300);
-    }
+            elements.loadingScreen.style.display = 'none';
+            document.body.classList.add('loaded');
+            elements.gameApp.classList.add('loaded');
+        }, 500);
+    }, 300);
 }
 
 // Apply theme function
