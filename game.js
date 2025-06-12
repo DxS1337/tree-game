@@ -233,30 +233,24 @@ function applyTheme() {
         }
 // Initialize game
 function initGame() {
-    updateProgress(100);
-    
+updateProgress(LOADING_STEPS.INIT);
+setTimeout(() => {
+    applyTheme();
+    updateProgress(LOADING_STEPS.STATE);
     setTimeout(() => {
-        applyTheme();
-        updateProgress(LOADING_STEPS.STATE);
-        
+        loadGame();
+        updateProgress(LOADING_STEPS.UI);
         setTimeout(() => {
-            loadGame();
-            updateProgress(LOADING_STEPS.UI);
-            
+            // ...
+            updateProgress(LOADING_STEPS.LISTENERS);
             setTimeout(() => {
-                initAchievements();
-                updateUI();
-                updateChestTimer();
-                renderSkills();
-                renderShop();
-                renderAchievements();
-                updateGardenSlotsUI();
-                updateProgress(LOADING_STEPS.LISTENERS);
-                
-                setTimeout(() => {
-                    setupEventListeners();
-                    updateProgress(LOADING_STEPS.FINISH);
-                    
+                // ...
+                updateProgress(LOADING_STEPS.FINISH);
+                // ...
+            }, 50);
+        }, 50);
+    }, 50);
+}, 50);                    
                     // Telegram specific initialization
                     if (CONSTANTS.IS_TELEGRAM) {
                         const viewportHeight = tg.viewportHeight || window.innerHeight;
