@@ -42,7 +42,11 @@ const CONSTANTS = {
 };
 
 // Game state (расширенная инициализация)
-gameState = {
+'use strict';
+
+// ... (ваш код выше)
+
+const gameState = {
     profile: {
         username: "Игрок",
         achievements: [],
@@ -83,7 +87,8 @@ gameState = {
             description: 'Открой все награды ежедневного сундука.',
             icon: '🎁',
             unlocked: false
-    },
+        }
+    ],
     level: 1,
     xp: 0,
     energy: 5,
@@ -98,14 +103,14 @@ gameState = {
         2: { unlocked: false, tree: null, lastWatered: null, growthStage: 0, xp: 0 }
     },
     upgrades: {
-        waterEfficiency: { name: "Эффективность полива", currentLevel: 0, maxLevel: 5, price: 100, description: "", },
-        coinMultiplier: { name: "Множитель монет", currentLevel: 0, maxLevel: 5, price: 200, description: "", },
-        plantEfficiency: { name: "Эффективность посадки", currentLevel: 0, maxLevel: 5, price: 150, description: "", },
-        plantReward: { name: "Бонус за посадку", currentLevel: 0, maxLevel: 5, price: 120, description: "", },
-        premiumDiscount: { name: "Скидка на премиум", currentLevel: 0, maxLevel: 5, price: 300, description: "", },
-        dailyBonus: { name: "Бонус за сундуки", currentLevel: 0, maxLevel: 5, price: 180, description: "", },
-        energyCap: { name: "Макс. энергия", currentLevel: 0, maxLevel: 10, price: 150, description: "", },
-        energyRegen: { name: "Восстановление энергии", currentLevel: 0, maxLevel: 1, price: 500, description: "", }
+        waterEfficiency: { name: "Эффективность полива", currentLevel: 0, maxLevel: 5, price: 100, description: "" },
+        coinMultiplier: { name: "Множитель монет", currentLevel: 0, maxLevel: 5, price: 200, description: "" },
+        plantEfficiency: { name: "Эффективность посадки", currentLevel: 0, maxLevel: 5, price: 150, description: "" },
+        plantReward: { name: "Бонус за посадку", currentLevel: 0, maxLevel: 5, price: 120, description: "" },
+        premiumDiscount: { name: "Скидка на премиум", currentLevel: 0, maxLevel: 5, price: 300, description: "" },
+        dailyBonus: { name: "Бонус за сундуки", currentLevel: 0, maxLevel: 5, price: 180, description: "" },
+        energyCap: { name: "Макс. энергия", currentLevel: 0, maxLevel: 10, price: 150, description: "" },
+        energyRegen: { name: "Восстановление энергии", currentLevel: 0, maxLevel: 1, price: 500, description: "" }
     },
     skills: {
         inventory: {
@@ -121,7 +126,6 @@ gameState = {
         daily: { lastOpened: 0, cooldown: CONSTANTS.DAILY_CHEST_COOLDOWN, dropRates: {} },
         premium: { pityCounter: 0, price: CONSTANTS.PREMIUM_CHEST_PRICE, dropRates: {} }
     },
-    achievementsData: [],
     lastSave: 0,
     energyChanged: false,
     coinsChanged: false,
