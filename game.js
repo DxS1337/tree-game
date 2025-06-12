@@ -171,6 +171,8 @@ const elements = {
     game2048Restart: document.getElementById('game-2048-restart'),
     game2048Close: document.getElementById('game-2048-close'),
     console.log('elements:', elements);
+    
+
 
 };
 // Notification queue
@@ -771,8 +773,7 @@ function checkLevelUp() {
         updateUI();
         renderSkills();
         saveGame();
-        showNotification(`Уровень ${gameState.level}! Энергия восстановлена. Получено ${skillPoints} очков навыков для каждой категории!`);
-    }
+        showNotification(`Уровень ${gameState.level}! Энергия восстановлена. Получено ${skillPoints} очков навыков для каждой категории!`);    }
 }
 
 // Форматирование чисел (1K, 1M)
@@ -858,6 +859,7 @@ function renderSkills() {
             (!organized.required || quickHands.currentLevel >= organized.required.level);
         elements.upgradeOrganized.disabled = !canUpgrade;
     }
+} 
 
 function upgradeSkill(category, skillName) {
     const skillCategory = gameState.skills[category];
