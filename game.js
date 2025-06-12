@@ -156,10 +156,6 @@ const notificationQueue = [];
 let isNotificationShowing = false;
 
 // DOM elements
-const elements = {
-    loadingScreen: document.getElementById('loading-screen'),
-    loadingProgress: document.getElementById('loading-progress'),
-};
 
 if (!elements.loadingScreen) console.error('Loading screen element not found');
 
