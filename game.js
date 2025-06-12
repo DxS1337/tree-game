@@ -131,7 +131,6 @@ const gameState = {
     coinsChanged: false,
     openingChest: false
 };
-
 // DOM elements
 const elements = {
     loadingScreen: document.getElementById('loading-screen'),
