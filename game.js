@@ -116,7 +116,7 @@ const gameState = {
 // DOM elements
 const elements = {
     loadingScreen: document.getElementById('loading-screen'),
-    loadingProgress: document.querySelector('.loading-progress'),
+    loadingProgress: document.querySelector('.loading-progress'), // исправили
     gameApp: document.querySelector('.game-app'),
     energyDisplay: document.getElementById('energy'),
     maxEnergyDisplay: document.getElementById('max-energy'),
@@ -171,7 +171,6 @@ const elements = {
     game2048Restart: document.getElementById('game-2048-restart'),
     game2048Close: document.getElementById('game-2048-close'),
 };
-
 // Notification queue
 const notificationQueue = [];
 let isNotificationShowing = false;
