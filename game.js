@@ -860,11 +860,6 @@ function renderSkills() {
     }
 }
 
-// Вынести upgradeSkill за пределы renderSkills!
-function upgradeSkill(category, skillName) {
-    const skillCategory = gameState.skills[category];
-    const skill = skillCategory.upgrades[skillName];
-
     // Проверка требований
     if (skill.required) {
         const requiredSkill = skillCategory.upgrades[skill.required.skill];
@@ -908,6 +903,11 @@ function buyUpgrade(upgradeKey) {
         saveGame();
         showNotification(`Улучшение "${upgrade.name}" куплено!`);
     }
+}
+// Вынести upgradeSkill за пределы renderSkills!
+function upgradeSkill(category, skillName) {
+    const skillCategory = gameState.skills[category];
+    const skill = skillCategory.upgrades[skillName];
 }
 
 // Сундуки
