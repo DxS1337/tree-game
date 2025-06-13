@@ -837,29 +837,30 @@ function renderSkills() {
     // Inventory skills
     const exemFasterMatch = gameState.skills.inventory.upgrades.exemFasterMatch;
     if (elements.upgradeExem) {
-        elements.upgradeExem.disabled = gameState.skills.inventory.points < exemFasterMatch.cost ||
+        elements.upgradeExem.disabled = gameState.skills.inventory.points < exemFasterMatch.cost || 
             exemFasterMatch.currentLevel >= exemFasterMatch.maxLevel;
     }
 
     const quickHands = gameState.skills.inventory.upgrades.quickHands;
     if (elements.upgradeQuickHands) {
-        elements.upgradeQuickHands.textContent = `Улучшить`;
-        const canUpgrade = gameState.skills.inventory.points >= quickHands.cost &&
-            quickHands.currentLevel < quickHands.maxLevel &&
-            (!quickHands.required || exemFasterMatch.currentLevel >= quickHands.required.level);
+        elements.upgradeQuickHands.textContent = `Улучшить`;  // Исправлено имя элемента
+        const canUpgrade = gameState.skills.inventory.points >= quickHands.cost && 
+                        quickHands.currentLevel < quickHands.maxLevel &&
+                        (!quickHands.required || exemFasterMatch.currentLevel >= quickHands.required.level);
         elements.upgradeQuickHands.disabled = !canUpgrade;
     }
 
     const organized = gameState.skills.inventory.upgrades.organized;
     if (elements.upgradeOrganized) {
-        elements.upgradeOrganized.textContent = `Улучшить`;
-        const canUpgrade = gameState.skills.inventory.points >= organized.cost &&
-            organized.currentLevel < organized.maxLevel &&
-            (!organized.required || quickHands.currentLevel >= organized.required.level);
+        elements.upgradeOrganized.textContent = `Улучшить`;  // Исправлено имя элемента
+        const canUpgrade = gameState.skills.inventory.points >= organized.cost && 
+                        organized.currentLevel < organized.maxLevel &&
+                        (!organized.required || quickHands.currentLevel >= organized.required.level);
         elements.upgradeOrganized.disabled = !canUpgrade;
     }
-} 
+}
 
+// Вынести upgradeSkill за пределы renderSkills!
 function upgradeSkill(category, skillName) {
     const skillCategory = gameState.skills[category];
     const skill = skillCategory.upgrades[skillName];
@@ -882,38 +883,6 @@ function upgradeSkill(category, skillName) {
     } else if (skillCategory.points < skill.cost) {
         showNotification("Недостаточно очков для улучшения!");
     }
-}
-
-// Магазин
-function renderShop() {
-    if (!elements.shopItems) return;
-    
-    elements.shopItems.innerHTML = '';
-    
-    for (const [key, upgrade] of Object.entries(gameState.upgrades)) {
-        const item = document.createElement('div');
-        item.className = 'shop-item';
-        
-        item.innerHTML = `
-            <div class="shop-item-info">
-                <div class="shop-item-title">${upgrade.name}</div>
-                <div class="shop-item-level">(${upgrade.currentLevel}/${upgrade.maxLevel})</div>
-                <div class="shop-item-desc">${upgrade.description}</div>
-            </div>
-            <button class="shop-item-btn" data-upgrade="${key}" 
-                ${gameState.coins < upgrade.price || upgrade.currentLevel >= upgrade.maxLevel ? 'disabled' : ''}>
-                Купить (${formatNumber(upgrade.price)})
-            </button>
-        `;
-        
-        elements.shopItems.appendChild(item);
-    }
-    
-    document.querySelectorAll('.shop-item-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            buyUpgrade(this.dataset.upgrade);
-        });
-    });
 }
 
 function buyUpgrade(upgradeKey) {
