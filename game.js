@@ -824,7 +824,6 @@ function updateUI() {
     }
 }
 
-// Навыки
 function renderSkills() {
     // Обновляем счетчики очков
     document.querySelectorAll('.skill-value').forEach(el => {
@@ -837,28 +836,32 @@ function renderSkills() {
     // Inventory skills
     const exemFasterMatch = gameState.skills.inventory.upgrades.exemFasterMatch;
     if (elements.upgradeExem) {
-        elements.upgradeExem.disabled = gameState.skills.inventory.points < exemFasterMatch.cost || 
+        elements.upgradeExem.disabled = gameState.skills.inventory.points < exemFasterMatch.cost ||
             exemFasterMatch.currentLevel >= exemFasterMatch.maxLevel;
     }
 
     const quickHands = gameState.skills.inventory.upgrades.quickHands;
     if (elements.upgradeQuickHands) {
         elements.upgradeQuickHands.textContent = `Улучшить`;
-        const canUpgrade = gameState.skills.inventory.points >= quickHands.cost && 
-                        quickHands.currentLevel < quickHands.maxLevel &&
-                        (!quickHands.required || exemFasterMatch.currentLevel >= quickHands.required.level);
+        const canUpgrade = gameState.skills.inventory.points >= quickHands.cost &&
+            quickHands.currentLevel < quickHands.maxLevel &&
+            (!quickHands.required || exemFasterMatch.currentLevel >= quickHands.required.level);
         elements.upgradeQuickHands.disabled = !canUpgrade;
     }
 
     const organized = gameState.skills.inventory.upgrades.organized;
     if (elements.upgradeOrganized) {
         elements.upgradeOrganized.textContent = `Улучшить`;
-        const canUpgrade = gameState.skills.inventory.points >= organized.cost && 
-                        organized.currentLevel < organized.maxLevel &&
-                        (!organized.required || quickHands.currentLevel >= organized.required.level);
+        const canUpgrade = gameState.skills.inventory.points >= organized.cost &&
+            organized.currentLevel < organized.maxLevel &&
+            (!organized.required || quickHands.currentLevel >= organized.required.level);
         elements.upgradeOrganized.disabled = !canUpgrade;
     }
 }
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Вынеси upgradeSkill вне renderSkills (ставь после renderSkills)
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 function upgradeSkill(category, skillName) {
     const skillCategory = gameState.skills[category];
@@ -883,6 +886,7 @@ function upgradeSkill(category, skillName) {
         showNotification("Недостаточно очков для улучшения!");
     }
 }
+
 
 function buyUpgrade(upgradeKey) {
     const upgrade = gameState.upgrades[upgradeKey];
