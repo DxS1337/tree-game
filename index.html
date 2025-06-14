@@ -32,7 +32,38 @@
     </div>
 
   <!-- Админская кнопка -->
-  
+    <button class="admin-btn" id="admin-btn">⚙️</button>
+    <div class="admin-panel" id="admin-panel">
+        <h3>Админ-панель</h3>
+        <button id="reset-btn" class="btn btn-primary">Сбросить игру</button>
+        <input type="number" id="set-level" class="admin-input" placeholder="Уровень">
+        <input type="number" id="set-xp" class="admin-input" placeholder="XP">
+        <input type="number" id="set-energy" class="admin-input" placeholder="Энергия">
+        <input type="number" id="set-coins" class="admin-input" placeholder="Монеты">
+        
+        <div class="tile-selector">
+            <label for="set-tile-value">Выберите плитку:</label>
+            <input type="range" id="set-tile-value" min="2" max="2048" step="2" value="2" list="tile-values">
+            <datalist id="tile-values">
+                <option value="2" label="2">
+                <option value="4" label="4">
+                <option value="8" label="8">
+                <option value="16" label="16">
+                <option value="32" label="32">
+                <option value="64" label="64">
+                <option value="128" label="128">
+                <option value="256" label="256">
+                <option value="512" label="512">
+                <option value="1024" label="1024">
+                <option value="2048" label="2048">
+            </datalist>
+            <span id="tile-value-display">2</span>
+        </div>
+        <button id="add-tile-btn" class="btn btn-secondary">Добавить плитку</button>
+        <button id="add-block-btn" class="btn btn-secondary">Добавить 2048</button>
+        <button id="apply-btn" class="btn btn-primary">Применить</button>
+    </div>
+
 
     <!-- Основной контент с разделами -->
     <div class="game-app">
