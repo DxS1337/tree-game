@@ -1368,6 +1368,68 @@ function isLocalStorageAvailable() {
         return false;
     }
 }
+function saveGame() {
+    // Проверяем доступность localStorage
+    if (!isLocalStorageAvailable()) {
+        console.log("LocalStorage не доступен. Невозможно сохранить игру.");
+        return;
+    }
+
+    try {
+        // Подготовка данных для сохранения
+        const saveData = {
+            profile: gameState.profile,
+            level: gameState.level,
+            xp: gameState.xp,
+            energy: gameState.energy,
+            maxEnergy: gameState.maxEnergy,
+            coins: gameState.coins,
+            target: gameState.target,
+            planted: gameState.planted,
+            nextLevelXP: gameState.nextLevelXP,
+            activeTreeSlot: gameState.activeTreeSlot,
+            gardenSlots: gameState.gardenSlots,
+            upgrades: {},
+            skills: {},
+            chests: {
+                daily: {
+                    lastOpened: gameState.chests.daily.lastOpened
+                },
+                premium: {
+                    pityCounter: gameState.chests.premium.pityCounter
+                }
+            },
+            achievementsData: gameState.achievementsData
+        };
+
+        // Сохраняем улучшения
+        for (const [key, upgrade] of Object.entries(gameState.upgrades)) {
+            saveData.upgrades[key] = {
+                currentLevel: upgrade.currentLevel
+            };
+        }
+
+        // Сохраняем навыки
+        for (const [category, data] of Object.entries(gameState.skills)) {
+            saveData.skills[category] = {
+                points: data.points,
+                upgrades: {}
+            };
+            for (const [skillName, skillData] of Object.entries(data.upgrades)) {
+                saveData.skills[category].upgrades[skillName] = {
+                    currentLevel: skillData.currentLevel
+                };
+            }
+        }
+
+        // Сохраняем в localStorage
+        localStorage.setItem('tree-game-save', JSON.stringify(saveData));
+        console.log('Игра сохранена');
+    } catch (error) {
+        console.error('Ошибка при сохранении игры:', error);
+        showNotification('Ошибка сохранения игры');
+    }
+}
 
 function loadGame() {
     // Проверяем доступность localStorage
