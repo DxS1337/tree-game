@@ -172,15 +172,11 @@ const elements = {
     game2048Close: document.getElementById('game-2048-close'),
 };
 
- console.log('elements:', elements);
+console.log('elements:', elements);
 
 // Notification queue
 const notificationQueue = [];
 let isNotificationShowing = false;
-
-// DOM elements
-
-if (!elements.loadingScreen) console.error('Loading screen element not found');
 
 // Loading steps
 const LOADING_STEPS = {
@@ -212,6 +208,7 @@ function updateProgress(step) {
         }, 300);
     }
 }
+
 // Apply theme function
 function applyTheme() {
     try {
@@ -228,75 +225,62 @@ function applyTheme() {
     }
 }
 
-        function initAchievements() {
-            if (!gameState.achievementsData) return;
-            gameState.achievementsData.forEach(ach => {
-                ach.unlocked = gameState.profile.achievements.includes(ach.id);
-            });
-        }
+function initAchievements() {
+    if (!gameState.achievementsData) return;
+    gameState.achievementsData.forEach(ach => {
+        ach.unlocked = gameState.profile.achievements.includes(ach.id);
+    });
+}
+
 // Initialize game
 function initGame() {
-updateProgress(LOADING_STEPS.INIT);
-setTimeout(() => {
+    updateProgress(LOADING_STEPS.INIT);
     applyTheme();
     updateProgress(LOADING_STEPS.STATE);
-    setTimeout(() => {
-        loadGame();
-        updateProgress(LOADING_STEPS.UI);
-        setTimeout(() => {
-            // ...
-            updateProgress(LOADING_STEPS.LISTENERS);
-            setTimeout(() => {
-                // ...
-                updateProgress(LOADING_STEPS.FINISH);
-                // ...
-            }, 50);
-        }, 50);
-    }, 50);
-}, 50);                    
-                    // Telegram specific initialization
-                    if (CONSTANTS.IS_TELEGRAM) {
-                        const viewportHeight = tg.viewportHeight || window.innerHeight;
-                        document.documentElement.style.setProperty('--viewport-height', `${viewportHeight}px`);
-                        document.body.classList.add('telegram-app');
-                        
-                        // Handle viewport changes
-                        try {
-                            tg.onEvent('viewportChanged', () => {
-                                const newHeight = tg.viewportHeight;
-                                document.documentElement.style.setProperty('--viewport-height', `${newHeight}px`);
-                            });
-                        } catch (e) {
-                            console.error('Ошибка при установке обработчика viewportChanged:', e);
-                        }
-                    }
-                    
-                    // Disable zoom on iOS
-                    document.addEventListener('touchmove', function(e) {
-                        if (e.scale !== 1) { e.preventDefault(); }
-                    }, { passive: false });
-                    
-                    // iOS optimizations
-                    if (tg.platform === 'ios') {
-                        document.body.style.height = `${tg.viewportHeight}px`;
-                        window.addEventListener('resize', () => {
-                            document.body.style.height = `${tg.viewportHeight}px`;
-                        });
-                    }
-                    
-                    // Start timers
-                    setInterval(updateChestTimer, 60000);
-                    setInterval(regenerateEnergy, CONSTANTS.ENERGY_REGEN_TIME);
-                    setInterval(checkTreeHealth, 24 * 60 * 60 * 1000);
-                    
-                    if (elements.rewardModal) {
-                        elements.rewardModal.style.display = 'none';
-                    }
-                    checkTreeHealth();
-                }, 50);
-            }, 50);
-        }, 50);
-    }, 50);
+    loadGame();
+    updateProgress(LOADING_STEPS.UI);
+    setupEventListeners();
+    updateProgress(LOADING_STEPS.LISTENERS);
+    
+    // Telegram specific initialization
+    if (CONSTANTS.IS_TELEGRAM) {
+        const viewportHeight = tg.viewportHeight || window.innerHeight;
+        document.documentElement.style.setProperty('--viewport-height', `${viewportHeight}px`);
+        document.body.classList.add('telegram-app');
+        
+        try {
+            tg.onEvent('viewportChanged', () => {
+                const newHeight = tg.viewportHeight;
+                document.documentElement.style.setProperty('--viewport-height', `${newHeight}px`);
+            });
+        } catch (e) {
+            console.error('Ошибка при установке обработчика viewportChanged:', e);
+        }
+    }
+    
+    // Disable zoom on iOS
+    document.addEventListener('touchmove', function(e) {
+        if (e.scale !== 1) { e.preventDefault(); }
+    }, { passive: false });
+    
+    // iOS optimizations
+    if (tg.platform === 'ios') {
+        document.body.style.height = `${tg.viewportHeight}px`;
+        window.addEventListener('resize', () => {
+            document.body.style.height = `${tg.viewportHeight}px`;
+        });
+    }
+    
+    // Start timers
+    setInterval(updateChestTimer, 60000);
+    setInterval(regenerateEnergy, CONSTANTS.ENERGY_REGEN_TIME);
+    setInterval(checkTreeHealth, 24 * 60 * 60 * 1000);
+    
+    if (elements.rewardModal) {
+        elements.rewardModal.style.display = 'none';
+    }
+    checkTreeHealth();
+    updateProgress(LOADING_STEPS.FINISH);
 }
 
 // Setup event listeners
@@ -374,6 +358,17 @@ function setupEventListeners() {
         elements.username.addEventListener('change', function() {
             gameState.profile.username = this.value || CONSTANTS.DEFAULT_USERNAME;
             saveGame();
+        });
+    }
+
+    // Theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.checked = (gameState.profile?.themeMode === 'dark');
+        themeToggle.addEventListener('change', function() {
+            gameState.profile.themeMode = this.checked ? 'dark' : 'light';
+            saveGame();
+            applyTheme();
         });
     }
 
@@ -457,7 +452,8 @@ function showContentSection(sectionId) {
         'home-content': 'home-nav',
         'shop-content': 'shop-nav',
         'skills-content': 'skills-nav',
-        'profile-content': 'profile-nav'
+        'profile-content': 'profile-nav',
+        'games-content': 'gamepad-nav'
     };
     
     const navBtnId = navBtnMap[sectionId];
@@ -772,7 +768,8 @@ function checkLevelUp() {
         updateUI();
         renderSkills();
         saveGame();
-        showNotification(`Уровень ${gameState.level}! Энергия восстановлена. Получено ${skillPoints} очков навыков для каждой категории!`);    }
+        showNotification(`Уровень ${gameState.level}! Энергия восстановлена. Получено ${skillPoints} очков навыков для каждой категории!`);
+    }
 }
 
 // Форматирование чисел (1K, 1M)
@@ -838,6 +835,7 @@ function renderSkills() {
     if (elements.upgradeExem) {
         elements.upgradeExem.disabled = gameState.skills.inventory.points < exemFasterMatch.cost ||
             exemFasterMatch.currentLevel >= exemFasterMatch.maxLevel;
+        document.getElementById('exem-level').textContent = `Уровень: ${exemFasterMatch.currentLevel}/${exemFasterMatch.maxLevel}`;
     }
 
     const quickHands = gameState.skills.inventory.upgrades.quickHands;
@@ -847,6 +845,7 @@ function renderSkills() {
             quickHands.currentLevel < quickHands.maxLevel &&
             (!quickHands.required || exemFasterMatch.currentLevel >= quickHands.required.level);
         elements.upgradeQuickHands.disabled = !canUpgrade;
+        document.getElementById('quick-hands-level').textContent = `Уровень: ${quickHands.currentLevel}/${quickHands.maxLevel}`;
     }
 
     const organized = gameState.skills.inventory.upgrades.organized;
@@ -856,12 +855,9 @@ function renderSkills() {
             organized.currentLevel < organized.maxLevel &&
             (!organized.required || quickHands.currentLevel >= organized.required.level);
         elements.upgradeOrganized.disabled = !canUpgrade;
+        document.getElementById('organized-level').textContent = `Уровень: ${organized.currentLevel}/${organized.maxLevel}`;
     }
 }
-
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Вынеси upgradeSkill вне renderSkills (ставь после renderSkills)
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 function upgradeSkill(category, skillName) {
     const skillCategory = gameState.skills[category];
@@ -887,7 +883,6 @@ function upgradeSkill(category, skillName) {
     }
 }
 
-
 function buyUpgrade(upgradeKey) {
     const upgrade = gameState.upgrades[upgradeKey];
     
@@ -912,10 +907,34 @@ function buyUpgrade(upgradeKey) {
         showNotification(`Улучшение "${upgrade.name}" куплено!`);
     }
 }
-// Вынести upgradeSkill за пределы renderSkills!
-function upgradeSkill(category, skillName) {
-    const skillCategory = gameState.skills[category];
-    const skill = skillCategory.upgrades[skillName];
+
+function renderShop() {
+    if (!elements.shopItems) return;
+    
+    elements.shopItems.innerHTML = '';
+    
+    for (const [key, upgrade] of Object.entries(gameState.upgrades)) {
+        const item = document.createElement('div');
+        item.className = 'shop-item';
+        item.innerHTML = `
+            <div class="shop-item-info">
+                <div class="shop-item-title">${upgrade.name}</div>
+                <div class="shop-item-level">Уровень: ${upgrade.currentLevel}/${upgrade.maxLevel}</div>
+                <div class="shop-item-desc">${upgrade.description}</div>
+            </div>
+            <button class="shop-item-btn" data-upgrade="${key}" 
+                ${gameState.coins < upgrade.price || upgrade.currentLevel >= upgrade.maxLevel ? 'disabled' : ''}>
+                ${upgrade.price} монет
+            </button>
+        `;
+        
+        const btn = item.querySelector('.shop-item-btn');
+        if (btn) {
+            btn.addEventListener('click', () => buyUpgrade(key));
+        }
+        
+        elements.shopItems.appendChild(item);
+    }
 }
 
 // Сундуки
@@ -1844,17 +1863,6 @@ const game2048 = {
         if (victoryScreen) victoryScreen.remove();
     }
 };
-
-
-        // Установить положение тумблера по saved теме
-        themeToggle.checked = (gameState.profile?.themeMode === 'dark');
-        themeToggle.addEventListener('change', function() {
-            gameState.profile.themeMode = this.checked ? 'dark' : 'light';
-            saveGame();
-            applyTheme();
-        });
-    }
-});
 
 document.addEventListener('DOMContentLoaded', () => {
     if (elements.loadingScreen) {
