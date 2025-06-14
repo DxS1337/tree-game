@@ -39,8 +39,8 @@ const CONSTANTS = {
     BASE_SKILL_POINTS: 1,
     IS_TELEGRAM: typeof Telegram !== 'undefined',
     VIEWPORT_HEIGHT: tg?.WebApp?.viewportHeight || window.innerHeight,
-    GARDEN_SLOT_COST_STARS: 50, // Стоимость разблокировки слота в Stars
-    SUPPORTS_STARS: false // Будет установлено при инициализации
+    GARDEN_SLOT_COST_STARS: 50,
+    SUPPORTS_STARS: false
 };
 
 // Game state
