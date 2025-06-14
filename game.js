@@ -718,7 +718,7 @@ function unlockGardenSlot(slotNumber) {
             showNotification('Ошибка при обработке платежа');
         }
     } else {
-        showNotification('Донаты доступны только в Telegram');
+        showNotification('Временно не работает');
     }
 }
 
