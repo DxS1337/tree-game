@@ -969,13 +969,27 @@ body {
     z-index: 1000;
     text-shadow: 0 0 10px rgba(0,0,0,0.5);
     transition: all 0.5s ease;
+    pointer-events: none;
+    text-align: center;
+    width: 100%;
 }
 
 .skill-point-animation.animate {
     opacity: 1;
     transform: translate(-50%, -100%);
+    animation: floatUp 1s ease-out forwards;
 }
 
+@keyframes floatUp {
+    0% {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -150%);
+        opacity: 0;
+    }
+}
 /* 2048 game styles */
 .game-container {
     position: fixed;
