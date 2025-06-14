@@ -241,6 +241,8 @@ function initGame() {
     applyTheme();
     updateProgress(LOADING_STEPS.STATE);
     loadGame();
+    initAchievements();
+    renderAchievements();
     updateProgress(LOADING_STEPS.UI);
     setupEventListeners();
     updateProgress(LOADING_STEPS.LISTENERS);
@@ -351,16 +353,17 @@ function setupEventListeners() {
     if (elements.gamepadNav) elements.gamepadNav.addEventListener('click', () => showContentSection('games-content'));
 
     // Skills
-document.addEventListener('click', function(e) {
-    if (e.target.closest('#upgrade-exem')) {
-        upgradeSkill('inventory', 'exemFasterMatch');
-    }
-    if (e.target.closest('#upgrade-quick-hands')) {
-        upgradeSkill('inventory', 'quickHands');
-    }
-    if (e.target.closest('#upgrade-organized')) {
-        upgradeSkill('inventory', 'organized');
-    }
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('#upgrade-exem')) {
+            upgradeSkill('inventory', 'exemFasterMatch');
+        }
+        if (e.target.closest('#upgrade-quick-hands')) {
+            upgradeSkill('inventory', 'quickHands');
+        }
+        if (e.target.closest('#upgrade-organized')) {
+            upgradeSkill('inventory', 'organized');
+        }
+    });
 
     // Admin panel
     if (elements.adminBtn) {
@@ -521,7 +524,7 @@ function waterTree() {
     }
     
     const slot = gameState.gardenSlots[gameState.activeTreeSlot];
-    if (!slot.tree) {
+    if (!slot || !slot.tree) {
         showNotification("В этом слоте нет дерева!");
         return;
     }
@@ -532,7 +535,7 @@ function waterTree() {
     }
     
     if (gameState.energy < energyCost) {
-        showNotification(`Нужно ${energyCost} энергии!`);
+        showNotification(`Нужно ${energyCost.toFixed(1)} энергии!`);
         return;
     }
     
@@ -607,13 +610,19 @@ function plantTree() {
 }
 
 function plantTreeInSlot(slotNumber) {
+    const slot = gameState.gardenSlots[slotNumber];
+    if (!slot || !slot.unlocked) {
+        showNotification("Этот слот заблокирован!");
+        return;
+    }
+
     let energyCost = 2;
     if (gameState.upgrades.plantEfficiency.currentLevel > 0) {
         energyCost = Math.max(0.5, energyCost - (0.5 * gameState.upgrades.plantEfficiency.currentLevel));
     }
     
     if (gameState.energy < energyCost) {
-        showNotification(`Нужно ${energyCost} энергии!`);
+        showNotification(`Нужно ${energyCost.toFixed(1)} энергии!`);
         return;
     }
     
@@ -1009,18 +1018,18 @@ function renderShop() {
 
 // Сундуки
 function updateChestTimer() {
+    if (!elements.dailyTimer) return;
+    
     const now = Date.now();
     const lastOpened = gameState.chests.daily.lastOpened;
     const timeLeft = lastOpened + gameState.chests.daily.cooldown - now;
 
-    if (elements.dailyTimer) {
-        if (timeLeft <= 0) {
-            elements.dailyTimer.textContent = "Доступно";
-        } else {
-            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-            elements.dailyTimer.textContent = `${hours}ч ${minutes}м`;
-        }
+    if (timeLeft <= 0) {
+        elements.dailyTimer.textContent = "Доступно";
+    } else {
+        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        elements.dailyTimer.textContent = `${hours}ч ${minutes}м`;
     }
 }
 
@@ -1100,6 +1109,12 @@ function showRoulette(type) {
         const types = Object.keys(dropRates);
         const rewardType = getChestReward(type);
         const itemsContainer = rouletteModal.querySelector('.roulette-items');
+        
+        if (!itemsContainer) {
+            rouletteModal.remove();
+            reject();
+            return;
+        }
         
         const itemCount = 30;
         const targetIndex = 25;
@@ -1184,6 +1199,7 @@ function getChestReward(chestType) {
 
 function applyChestReward(chestType, rewardType) {
     const reward = gameState.chests[chestType].dropRates[rewardType];
+    if (!reward || !reward.bonus) return;
     
     if (reward.bonus.xp) {
         let xpBonus = reward.bonus.xp;
@@ -1229,12 +1245,13 @@ function showRewardModal(chestType, rewardType) {
         !elements.rewardDescription || !elements.rewardBonus) return;
     
     const reward = gameState.chests[chestType].dropRates[rewardType];
+    if (!reward) return;
     
     let bonusText = '';
-    if (reward.bonus.xp) bonusText += `+${reward.bonus.xp} XP `;
-    if (reward.bonus.coins) bonusText += `+${reward.bonus.coins} монет `;
-    if (reward.bonus.energy) bonusText += `+${reward.bonus.energy} энергии `;
-    if (reward.bonus.discount) bonusText += `Скидка ${reward.bonus.discount * 100}% в магазине`;
+    if (reward.bonus?.xp) bonusText += `+${reward.bonus.xp} XP `;
+    if (reward.bonus?.coins) bonusText += `+${reward.bonus.coins} монет `;
+    if (reward.bonus?.energy) bonusText += `+${reward.bonus.energy} энергии `;
+    if (reward.bonus?.discount) bonusText += `Скидка ${reward.bonus.discount * 100}% в магазине`;
     
     elements.rewardEmoji.textContent = reward.emoji;
     elements.rewardName.textContent = reward.name;
@@ -1278,31 +1295,12 @@ function unlockAchievement(id) {
     if (!gameState.profile.achievements.includes(id)) {
         gameState.profile.achievements.push(id);
         
-        // Обновляем данные достижений
         const achievement = gameState.achievementsData.find(a => a.id === id);
         if (achievement) {
             achievement.unlocked = true;
-            
-            // Показываем уведомление
             showNotification(`Достижение разблокировано: ${achievement.title}`);
-            
-            // Обновляем интерфейс
             renderAchievements();
             saveGame();
-            
-            // Проверяем достижение "Садовник"
-            if (id === 'gardener') {
-                const allSlotsUnlocked = Object.values(gameState.gardenSlots).every(slot => slot.unlocked);
-                if (allSlotsUnlocked && !gameState.profile.achievements.includes('gardener')) {
-                    gameState.profile.achievements.push('gardener');
-                    const gardenerAchievement = gameState.achievementsData.find(a => a.id === 'gardener');
-                    if (gardenerAchievement) {
-                        gardenerAchievement.unlocked = true;
-                        showNotification(`Достижение разблокировано: ${gardenerAchievement.title}`);
-                        renderAchievements();
-                    }
-                }
-            }
         }
     }
 }
@@ -1500,7 +1498,13 @@ function saveGame() {
                     daily: { lastOpened: gameState.chests.daily.lastOpened },
                     premium: { pityCounter: gameState.chests.premium.pityCounter }
                 },
-                achievementsData: gameState.achievementsData
+                achievementsData: gameState.achievementsData.map(ach => ({
+                    id: ach.id,
+                    icon: ach.icon,
+                    title: ach.title,
+                    description: ach.description,
+                    unlocked: ach.unlocked
+                }))
             };
             
             localStorage.setItem('tree-game-save', JSON.stringify(saveData));
