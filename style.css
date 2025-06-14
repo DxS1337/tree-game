@@ -819,33 +819,35 @@ body {
 }
 
 /* Модальное окно рулетки */
+/* Стили для модального окна рулетки */
 .roulette-modal {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: var(--card-color);
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     z-index: 1002;
-    width: 90%;
-    max-width: 320px;
-    overflow: hidden;
-    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
 }
 
 .roulette-modal.show {
-    display: block;
+    opacity: 1;
+    visibility: visible;
 }
 
 .roulette-modal .modal-content {
-    padding: 20px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: var(--card-color);
     border-radius: 16px;
-}
-
-.dark-theme .roulette-modal .modal-content {
-    background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+    padding: 20px;
+    width: 90%;
+    max-width: 320px;
+    position: relative;
 }
 
 .roulette-title {
@@ -855,8 +857,7 @@ body {
     text-align: center;
     padding: 12px;
     border-radius: 12px;
-    margin: -10px -10px 20px -10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    margin: -20px -20px 20px -20px;
     font-size: 1.2rem;
     position: relative;
     overflow: hidden;
@@ -883,57 +884,132 @@ body {
     100% { transform: translateX(100%) rotate(30deg); }
 }
 
-/* Окно награды */
-.reward-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: var(--card-color);
-    padding: 20px;
+/* Контейнер рулетки */
+.roulette-wrapper {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    margin: 20px 0;
+}
+
+.roulette-container {
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(to bottom right, #fafafa, #e0f7fa);
     border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    z-index: 1002;
-    max-width: 300px;
-    width: 90%;
+    position: relative;
+    overflow: hidden;
 }
 
-.reward-emoji {
-    font-size: 4rem;
-    margin: 15px 0;
-    animation: bounce 0.5s ease infinite alternate;
+.dark-theme .roulette-container {
+    background: linear-gradient(to bottom right, #2d3436, #000000);
 }
 
-@keyframes bounce {
-    from { transform: translateY(0); }
-    to { transform: translateY(-8px); }
+/* Элементы рулетки */
+.roulette-items {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: transform 4s cubic-bezier(0.15, 0.85, 0.35, 1);
+    will-change: transform;
 }
 
-.reward-name {
-    color: var(--secondary-color);
-    font-size: 1.5rem;
-    margin-bottom: 8px;
-}
-
-.reward-description {
-    color: #555;
-    font-size: 0.9rem;
-    line-height: 1.4;
-    margin: 12px 0;
-}
-
-.dark-theme .reward-description {
-    color: #9e9e9e;
-}
-
-.reward-bonus {
+.roulette-item {
+    min-width: 80px;
+    height: 80px;
+    margin: 0 10px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
     font-weight: bold;
-    font-size: 1.1rem;
-    color: var(--primary-color);
-    margin: 15px 0;
+    color: #444;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
 }
 
-.reward-modal .close {
+.dark-theme .roulette-item {
+    background: #424242;
+    color: white;
+}
+
+/* Указатель рулетки */
+.roulette-pointer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    background: red;
+    z-index: 10;
+}
+
+.roulette-pointer::before {
+    content: '▼';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: red;
+    font-size: 20px;
+}
+
+/* Стили для разных редкостей */
+.roulette-common { 
+    border: 2px solid #2e7d32;
+    background: var(--roulette-common); 
+}
+
+.roulette-uncommon { 
+    border: 2px solid #add8e6;
+    background: var(--roulette-uncommon); 
+}
+
+.roulette-rare { 
+    border: 2px solid #00008b;
+    background: var(--roulette-rare); 
+    color: white; 
+}
+
+.roulette-epic { 
+    border: 2px solid #800080;
+    background: var(--roulette-epic); 
+    color: white; 
+}
+
+.roulette-legendary {
+    border: 4px solid #ff69b4;
+    background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+    color: white;
+    animation: rainbow 2s linear infinite;
+    background-size: 200% 200%;
+}
+
+@keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+/* Анимация выигрышного элемента */
+.winning-item {
+    animation: pulse 0.5s ease infinite;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Кнопка закрытия */
+.roulette-modal .close {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -943,7 +1019,7 @@ body {
     z-index: 10;
 }
 
-.dark-theme .reward-modal .close {
+.dark-theme .roulette-modal .close {
     color: #ccc;
 }
 
