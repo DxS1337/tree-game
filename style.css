@@ -461,8 +461,8 @@ body {
 .chest-menu {
     display: none;
     position: absolute;
-    top: 80px;
-    right: 520px;
+    top: 50px;
+    right: 10px;
     background: white;
     padding: 10px;
     border-radius: 8px;
