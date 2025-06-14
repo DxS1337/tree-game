@@ -1591,60 +1591,71 @@ const game2048 = {
         return false;
     },
 
-    move(direction) {
-        if (!this.isPlaying) return false;
-        
-        const oldBoard = JSON.parse(JSON.stringify(this.board));
-        let scoreIncrease = 0;
+move(direction) {
+    if (!this.isPlaying) return false;
+    
+    const oldBoard = JSON.parse(JSON.stringify(this.board));
+    let scoreIncrease = 0;
 
-        switch(direction) {
-            case 'left':
-                for (let i = 0; i < 4; i++) {
-                    const result = this.moveRow(this.board[i]);
-                    this.board[i] = result.row;
-                    scoreIncrease += result.score;
-                }
-                break;
-            case 'right':
-                for (let i = 0; i < 4; i++) {
-                    const result = this.moveRow(this.board[i].reverse());
-                    this.board[i] = result.row.reverse();
-                    scoreIncrease += result.score;
-                }
-                break;
-            case 'up':
-                for (let j = 0; j < 4; j++) {
-                    let column = [this.board[0][j], this.board[1][j], this.board[2][j], this.board[3][j]];
-                    const result = this.moveRow(column);
-                    column = result.row;
-                    scoreIncrease += result.score;
-                    for (let i = 0; i < 4; i++) this.board[i][j] = column[i];
-                }
-                break;
-            case 'down':
-                for (let j = 0; j < 4; j++) {
-                    let column = [this.board[0][j], this.board[1][j], this.board[2][j], this.board[3][j]].reverse();
-                    const result = this.moveRow(column);
-                    column = result.row.reverse();
-                    scoreIncrease += result.score;
-                    for (let i = 0; i < 4; i++) this.board[i][j] = column[i];
-                }
-                break;
-        }
-
-        if (JSON.stringify(this.board) !== JSON.stringify(oldBoard)) {
-            if (scoreIncrease > 0) {
-                this.showScoreAnimation(scoreIncrease);
+    switch(direction) {
+        case 'left':
+            for (let i = 0; i < 4; i++) {
+                const result = this.moveRow(this.board[i]);
+                this.board[i] = result.row;
+                scoreIncrease += result.score;
             }
-            
-            this.score += scoreIncrease;
-            this.addRandomTile();
-            this.updateUI();
-            this.checkGameStatus();
-            return true;
+            break;
+        case 'right':
+            for (let i = 0; i < 4; i++) {
+                const result = this.moveRow(this.board[i].reverse());
+                this.board[i] = result.row.reverse();
+                scoreIncrease += result.score;
+            }
+            break;
+        case 'up':
+            for (let j = 0; j < 4; j++) {
+                let column = [
+                    this.board[0][j], 
+                    this.board[1][j], 
+                    this.board[2][j], 
+                    this.board[3][j]
+                ];
+                const result = this.moveRow(column);
+                column = result.row;
+                scoreIncrease += result.score;
+                for (let i = 0; i < 4; i++) this.board[i][j] = column[i];
+            }
+            break;
+        case 'down':
+            for (let j = 0; j < 4; j++) {
+                let column = [
+                    this.board[0][j], 
+                    this.board[1][j], 
+                    this.board[2][j], 
+                    this.board[3][j]
+                ].reverse();
+                const result = this.moveRow(column);
+                column = result.row.reverse();
+                scoreIncrease += result.score;
+                for (let i = 0; i < 4; i++) this.board[i][j] = column[i];
+            }
+            break;
+    }
+
+    if (JSON.stringify(this.board) !== JSON.stringify(oldBoard)) {
+        if (scoreIncrease > 0) {
+            this.showScoreAnimation(scoreIncrease);
         }
-        return false;
-    },
+        
+        this.score += scoreIncrease;
+        this.addRandomTile();
+        this.updateUI();
+        this.checkGameStatus();
+        return true;
+    }
+    return false;
+},
+ 
 
     moveRow(row) {
         let newRow = row.filter(cell => cell !== 0);
