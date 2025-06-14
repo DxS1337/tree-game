@@ -286,8 +286,12 @@ function initGame() {
 // Setup event listeners
 function setupEventListeners() {
     // Основные кнопки
-    if (elements.waterBtn) elements.waterBtn.addEventListener('click', waterTree);
-    if (elements.plantBtn) elements.plantBtn.addEventListener('click', plantTree);
+if (elements.waterBtn && typeof elements.waterBtn.addEventListener === 'function') {
+    elements.waterBtn.addEventListener('click', waterTree);
+}
+if (elements.plantBtn && typeof elements.plantBtn.addEventListener === 'function') {
+    elements.plantBtn.addEventListener('click', plantTree);
+}
 
     // Навигация
     if (elements.skillsNav) elements.skillsNav.addEventListener('click', () => showContentSection('skills-content'));
