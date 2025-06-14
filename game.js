@@ -108,10 +108,9 @@ const gameState = {
     },
     achievementsData: [
         { id: 'first-tree', icon: '🌱', title: 'Первое дерево', description: 'Посади первое дерево.', unlocked: false },
-        { id: 'trader', icon: '🪙', title: 'Торговец', description: 'Накопи 100 монет.', unlocked: false },
+        { id: 'trader', icon: '🤑', title: 'Торговец', description: 'Накопи 100 монет.', unlocked: false },
         { id: 'gardener', icon: '🌻', title: 'Садовник', description: 'Разблокируй все слоты сада.', unlocked: false },
         { id: 'expert', icon: '⭐', title: 'Эксперт', description: 'Достигни 10 уровня.', unlocked: false },
-        { id: 'collector', icon: '🎁', title: 'Коллекционер', description: 'Открой все типы сундуков.', unlocked: false }
     ],
     energyChanged: false,
     coinsChanged: false,
