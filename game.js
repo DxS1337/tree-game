@@ -304,6 +304,17 @@ if (elements.chestMenu) {
     });
 }
 
+if (elements.chestMenuBtn) {
+    elements.chestMenuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (elements.chestMenu) {
+            elements.chestMenu.classList.toggle('show');
+            updateChestTimer();
+        }
+    });
+}
+
+
     // Навигация
     if (elements.skillsNav) elements.skillsNav.addEventListener('click', () => showContentSection('skills-content'));
     if (elements.shopNav) elements.shopNav.addEventListener('click', () => showContentSection('shop-content'));
