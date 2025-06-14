@@ -1,6 +1,6 @@
 'use strict';
 
-// Telegram WebApp initialization
+// Telegram WebApp initializatio
 let tg = {
     WebApp: {
         platform: 'unknown',
