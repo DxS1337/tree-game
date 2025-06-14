@@ -1123,7 +1123,7 @@ function showRoulette(type) {
         const centerOffset = containerWidth / 2;
         const targetPosition = -(targetIndex * itemWidth) + centerOffset;
         
-        // Запускаем анимацию
+        // Запускаем анимацию (исправленная версия без calc())
         setTimeout(() => {
             itemsContainer.style.transform = `translateX(${targetPosition}px)`;
             itemsContainer.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.35, 1)';
