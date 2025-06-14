@@ -293,6 +293,17 @@ if (elements.plantBtn && typeof elements.plantBtn.addEventListener === 'function
     elements.plantBtn.addEventListener('click', plantTree);
 }
 
+if (elements.chestMenu) {
+    const chestOptions = elements.chestMenu.querySelectorAll('.chest-option');
+    chestOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const type = option.dataset.type;
+            openChest(type);
+            elements.chestMenu.classList.remove('show');
+        });
+    });
+}
+
     // Навигация
     if (elements.skillsNav) elements.skillsNav.addEventListener('click', () => showContentSection('skills-content'));
     if (elements.shopNav) elements.shopNav.addEventListener('click', () => showContentSection('shop-content'));
