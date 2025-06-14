@@ -247,6 +247,7 @@ function initGame() {
     loadGame();
     initAchievements();
     renderAchievements();
+    renderShop(); 
     updateProgress(LOADING_STEPS.UI);
     setupEventListeners();
     updateProgress(LOADING_STEPS.LISTENERS);
@@ -984,7 +985,7 @@ function buyUpgrade(upgradeKey) {
         }
         
         updateUI();
-        renderShop();
+        renderShop(); // Убедитесь, что этот вызов есть
         saveGame();
         showNotification(`Улучшение "${upgrade.name}" куплено!`);
     }
@@ -1359,166 +1360,135 @@ function isLocalStorageAvailable() {
 }
 
 function loadGame() {
-    if (!isLocalStorageAvailable()) return;
+    // Проверяем доступность localStorage
+    if (!isLocalStorageAvailable()) {
+        console.log("LocalStorage не доступен. Невозможно загрузить сохранение.");
+        return;
+    }
 
     try {
+        // Получаем данные сохранения из localStorage
         const saveData = localStorage.getItem('tree-game-save');
+        
+        // Если сохранение не найдено, начинаем новую игру
         if (!saveData) {
-            console.log('Нет сохраненных данных, начинаем новую игру');
+            console.log('Сохранение не найдено. Начинаем новую игру.');
             return;
         }
         
-        const parsed = JSON.parse(saveData);
-        if (!parsed || typeof parsed !== 'object') {
+        // Парсим данные сохранения
+        const parsedData = JSON.parse(saveData);
+        
+        // Проверяем корректность данных
+        if (!parsedData || typeof parsedData !== 'object') {
             throw new Error('Некорректные данные сохранения');
         }
-        
-        // Восстановите profile, если он есть в сохранении
-        if (parsed.profile) {
+
+        // Восстанавливаем профиль игрока
+        if (parsedData.profile) {
             gameState.profile = {
-                ...gameState.profile,
-                ...parsed.profile,
+                username: parsedData.profile.username || CONSTANTS.DEFAULT_USERNAME,
+                achievements: parsedData.profile.achievements || [],
+                themeMode: parsedData.profile.themeMode || "auto"
             };
         }
-        
-        // Основные данные игры
-        if (parsed.level) gameState.level = parsed.level;
-        if (parsed.xp) gameState.xp = parsed.xp;
-        if (parsed.energy) gameState.energy = parsed.energy;
-        if (parsed.maxEnergy) gameState.maxEnergy = parsed.maxEnergy;
-        if (parsed.coins) gameState.coins = parsed.coins;
-        if (parsed.target) gameState.target = parsed.target;
-        if (parsed.planted) gameState.planted = parsed.planted;
-        if (parsed.nextLevelXP) gameState.nextLevelXP = parsed.nextLevelXP;
-        if (parsed.activeTreeSlot) gameState.activeTreeSlot = parsed.activeTreeSlot;
-        
-        // Слоты сада
-        if (parsed.gardenSlots) {
-            for (const [slotNumber, slotData] of Object.entries(parsed.gardenSlots)) {
+
+        // Восстанавливаем основные игровые параметры
+        if (typeof parsedData.level === 'number') gameState.level = parsedData.level;
+        if (typeof parsedData.xp === 'number') gameState.xp = parsedData.xp;
+        if (typeof parsedData.energy === 'number') gameState.energy = parsedData.energy;
+        if (typeof parsedData.maxEnergy === 'number') gameState.maxEnergy = parsedData.maxEnergy;
+        if (typeof parsedData.coins === 'number') gameState.coins = parsedData.coins;
+        if (typeof parsedData.target === 'number') gameState.target = parsedData.target;
+        if (typeof parsedData.planted === 'number') gameState.planted = parsedData.planted;
+        if (typeof parsedData.nextLevelXP === 'number') gameState.nextLevelXP = parsedData.nextLevelXP;
+        if (typeof parsedData.activeTreeSlot === 'string') gameState.activeTreeSlot = parsedData.activeTreeSlot;
+
+        // Восстанавливаем слоты сада
+        if (parsedData.gardenSlots && typeof parsedData.gardenSlots === 'object') {
+            for (const slotNumber in parsedData.gardenSlots) {
                 if (gameState.gardenSlots[slotNumber]) {
-                    gameState.gardenSlots[slotNumber].unlocked = slotData.unlocked || false;
-                    gameState.gardenSlots[slotNumber].tree = slotData.tree || null;
-                    gameState.gardenSlots[slotNumber].lastWatered = slotData.lastWatered || null;
-                    gameState.gardenSlots[slotNumber].growthStage = slotData.growthStage || 0;
-                    gameState.gardenSlots[slotNumber].xp = slotData.xp || 0;
+                    const slotData = parsedData.gardenSlots[slotNumber];
+                    gameState.gardenSlots[slotNumber] = {
+                        unlocked: slotData.unlocked || false,
+                        tree: slotData.tree || null,
+                        lastWatered: slotData.lastWatered || null,
+                        growthStage: slotData.growthStage || 0,
+                        xp: slotData.xp || 0
+                    };
                 }
             }
         }
-        
-        // Улучшения
-        if (parsed.upgrades) {
-            for (const key in gameState.upgrades) {
-                if (parsed.upgrades[key]) {
-                    gameState.upgrades[key].currentLevel = parsed.upgrades[key].currentLevel || 0;
+
+        // Восстанавливаем улучшения
+        if (parsedData.upgrades && typeof parsedData.upgrades === 'object') {
+            for (const upgradeKey in gameState.upgrades) {
+                if (parsedData.upgrades[upgradeKey]) {
+                    gameState.upgrades[upgradeKey].currentLevel = 
+                        parsedData.upgrades[upgradeKey].currentLevel || 0;
                 }
             }
         }
-        
-        // Навыки
-        if (parsed.skills) {
-            for (const category in gameState.skills) {
-                if (parsed.skills[category]) {
-                    gameState.skills[category].points = parsed.skills[category].points || 0;
+
+        // Восстанавливаем навыки
+        if (parsedData.skills && typeof parsedData.skills === 'object') {
+            for (const skillCategory in gameState.skills) {
+                if (parsedData.skills[skillCategory]) {
+                    // Восстанавливаем очки навыков
+                    gameState.skills[skillCategory].points = 
+                        parsedData.skills[skillCategory].points || 0;
                     
-                    for (const skill in gameState.skills[category].upgrades) {
-                        if (parsed.skills[category].upgrades?.[skill]) {
-                            gameState.skills[category].upgrades[skill].currentLevel = 
-                                parsed.skills[category].upgrades[skill].currentLevel || 0;
+                    // Восстанавливаем уровни улучшений навыков
+                    for (const skillName in gameState.skills[skillCategory].upgrades) {
+                        if (parsedData.skills[skillCategory].upgrades && 
+                            parsedData.skills[skillCategory].upgrades[skillName]) {
+                            gameState.skills[skillCategory].upgrades[skillName].currentLevel = 
+                                parsedData.skills[skillCategory].upgrades[skillName].currentLevel || 0;
                         }
                     }
                 }
             }
         }
-        
-        // Сундуки
-        if (parsed.chests) {
-            gameState.chests.daily.lastOpened = parsed.chests.daily?.lastOpened || 0;
-            gameState.chests.premium.pityCounter = parsed.chests.premium?.pityCounter || 0;
+
+        // Восстанавливаем данные о сундуках
+        if (parsedData.chests && typeof parsedData.chests === 'object') {
+            if (parsedData.chests.daily && typeof parsedData.chests.daily.lastOpened === 'number') {
+                gameState.chests.daily.lastOpened = parsedData.chests.daily.lastOpened;
+            }
+            if (parsedData.chests.premium && typeof parsedData.chests.premium.pityCounter === 'number') {
+                gameState.chests.premium.pityCounter = parsedData.chests.premium.pityCounter;
+            }
         }
-        
-        // Достижения
-        if (parsed.achievementsData) {
-            gameState.achievementsData = parsed.achievementsData.map(ach => ({
-                ...ach,
-                unlocked: gameState.profile.achievements.includes(ach.id)
+
+        // Восстанавливаем достижения
+        if (Array.isArray(parsedData.achievementsData)) {
+            gameState.achievementsData = parsedData.achievementsData.map(achievement => ({
+                id: achievement.id,
+                icon: achievement.icon,
+                title: achievement.title,
+                description: achievement.description,
+                unlocked: gameState.profile.achievements.includes(achievement.id)
             }));
         } else {
+            // Если данных о достижениях нет, инициализируем их заново
             initAchievements();
         }
-    } catch (e) {
-        console.error("Ошибка загрузки сохранения:", e);
+
+        // Обновляем интерфейс магазина
+        renderShop();
+
+        console.log("Игра успешно загружена из сохранения.");
+    } catch (error) {
+        console.error("Ошибка при загрузке сохранения:", error);
+        
+        // Создаем резервную копию поврежденного сохранения
         const backupName = 'tree-game-save-corrupted-' + Date.now();
         localStorage.setItem(backupName, localStorage.getItem('tree-game-save'));
         localStorage.removeItem('tree-game-save');
+        
         showNotification("Ошибка загрузки сохранения. Начинаем новую игру.");
     }
 }
-
-function saveGame() {
-    if (!isLocalStorageAvailable()) {
-        console.warn('LocalStorage недоступен. Данные не сохранены.');
-        return;
-    }
-
-    const now = Date.now();
-    if (now - gameState.lastSave > 5000 || gameState.energyChanged || gameState.coinsChanged) {
-        try {
-            const saveData = {
-                level: gameState.level,
-                xp: gameState.xp,
-                energy: gameState.energy,
-                maxEnergy: gameState.maxEnergy,
-                coins: gameState.coins,
-                target: gameState.target,
-                planted: gameState.planted,
-                nextLevelXP: gameState.nextLevelXP,
-                activeTreeSlot: gameState.activeTreeSlot,
-                gardenSlots: gameState.gardenSlots,
-                profile: gameState.profile,
-                upgrades: Object.fromEntries(
-                    Object.entries(gameState.upgrades).map(([key, value]) => [
-                        key, 
-                        { currentLevel: value.currentLevel }
-                    ])
-                ),
-                skills: Object.fromEntries(
-                    Object.entries(gameState.skills).map(([category, data]) => [
-                        category,
-                        {
-                            points: data.points,
-                            upgrades: Object.fromEntries(
-                                Object.entries(data.upgrades).map(([skill, upgrade]) => [
-                                    skill,
-                                    { currentLevel: upgrade.currentLevel }
-                                ])
-                            )
-                        }
-                    ])
-                ),
-                chests: {
-                    daily: { lastOpened: gameState.chests.daily.lastOpened },
-                    premium: { pityCounter: gameState.chests.premium.pityCounter }
-                },
-                achievementsData: gameState.achievementsData.map(ach => ({
-                    id: ach.id,
-                    icon: ach.icon,
-                    title: ach.title,
-                    description: ach.description,
-                    unlocked: ach.unlocked
-                }))
-            };
-            
-            localStorage.setItem('tree-game-save', JSON.stringify(saveData));
-            gameState.lastSave = now;
-            gameState.energyChanged = false;
-            gameState.coinsChanged = false;
-        } catch (e) {
-            console.error("Ошибка сохранения:", e);
-            showNotification("Ошибка сохранения игры");
-        }
-    }
-}
-
 // Админ-панель
 function resetGame() {
     if (confirm("Сбросить игру? Весь прогресс будет потерян!")) {
