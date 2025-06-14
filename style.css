@@ -709,10 +709,8 @@ body {
     height: 120px;
     background: linear-gradient(to bottom right, #fafafa, #e0f7fa);
     border-radius: 12px;
-    overflow: hidden;
     position: relative;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    margin: 20px 0;
+    overflow: hidden;
 }
 
 .dark-theme .roulette-container {
@@ -727,6 +725,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     transition: transform 4s cubic-bezier(0.15, 0.85, 0.35, 1);
+    will-change: transform;
 }
 
 .roulette-item {
@@ -742,8 +741,7 @@ body {
     font-weight: bold;
     color: #444;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-    will-change: transform, opacity;
+    flex-shrink: 0;
 }
 
 .dark-theme .roulette-item {
