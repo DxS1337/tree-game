@@ -39,6 +39,10 @@ const CONSTANTS = {
     BASE_SKILL_POINTS: 1,
     IS_TELEGRAM: typeof Telegram !== 'undefined',
     VIEWPORT_HEIGHT: tg?.WebApp?.viewportHeight || window.innerHeight
+    GARDEN_SLOT_COST_STARS: 50, // Стоимость разблокировки слота в Stars
+    IS_TELEGRAM: typeof Telegram !== 'undefined', // Уже есть у вас
+    SUPPORTS_STARS: false // Будет установлено при инициализации
+
 };
 
 // Game state
@@ -241,6 +245,10 @@ function initGame() {
     updateProgress(LOADING_STEPS.UI);
     setupEventListeners();
     updateProgress(LOADING_STEPS.LISTENERS);
+
+        if (CONSTANTS.IS_TELEGRAM && tg?.WebApp) {
+        CONSTANTS.SUPPORTS_STARS = tg.WebApp.isSupports('openInvoice');
+    }
     
     // Telegram specific initialization
     if (CONSTANTS.IS_TELEGRAM) {
@@ -293,6 +301,29 @@ if (elements.plantBtn && typeof elements.plantBtn.addEventListener === 'function
     elements.plantBtn.addEventListener('click', plantTree);
 }
 
+    // Инициализация платежей Telegram
+    if (CONSTANTS.IS_TELEGRAM && tg?.WebApp) {
+        // Проверка поддержки Stars
+        if (!tg.WebApp.isSupports('openInvoice')) {
+            console.warn("Telegram Stars не поддерживаются в этом клиенте");
+        }
+        
+        // Обработка закрытия платежного окна
+        tg.WebApp.onEvent('invoiceClosed', (event) => {
+            console.log('Invoice closed:', event);
+            if (event.status === 'failed') {
+                showNotification("Оплата не удалась");
+            }
+        });
+        
+        // Обработка ошибок платежей
+        tg.WebApp.onEvent('invoiceError', (error) => {
+            console.error('Payment error:', error);
+            showNotification("Ошибка платежа: " + error.message);
+        });
+    }
+
+    
 if (elements.chestMenu) {
     const chestOptions = elements.chestMenu.querySelectorAll('.chest-option');
     chestOptions.forEach(option => {
@@ -643,24 +674,38 @@ function plantTreeInSlot(slotNumber) {
 }
 
 // Функция для разблокировки слота в саду
-function unlockGardenSlot(slotNumber, cost) {
-    if (gameState.coins >= cost) {
-        gameState.coins -= cost;
-        gameState.coinsChanged = true;
-        gameState.gardenSlots[slotNumber].unlocked = true;
+function unlockGardenSlot(slotNumber) {
+    const slot = gameState.gardenSlots[slotNumber];
+    if (!slot) return;
+
+    // Проверяем, есть ли Telegram WebApp
+    if (CONSTANTS.IS_TELEGRAM && tg.WebApp) {
+        // Стоимость в Stars (например, 50 Stars за слот)
+        const starsNeeded = 50;
         
-        // Проверяем, все ли слоты разблокированы для достижения
-        const allSlotsUnlocked = Object.values(gameState.gardenSlots).every(slot => slot.unlocked);
-        if (allSlotsUnlocked && !gameState.profile.achievements.includes('gardener')) {
-            unlockAchievement('gardener');
-        }
-        
-        updateGardenSlotsUI();
-        updateUI();
-        saveGame();
-        showNotification(`Слот ${slotNumber} разблокирован за ${cost} монет!`);
+        // Создаем платеж
+        const payment = {
+            id: 'slot_' + slotNumber + '_' + Date.now(),
+            title: 'Разблокировка слота для дерева',
+            description: 'Доступ к дополнительному слоту в саду',
+            currency: 'USD',
+            prices: [{ label: 'Stars', amount: starsNeeded * 100 }] // 1 Star = $0.01
+        };
+
+        // Открываем платежный интерфейс
+        tg.WebApp.openInvoice(payment, (status) => {
+            if (status === 'paid') {
+                // Платеж успешен
+                slot.unlocked = true;
+                updateGardenSlotsUI();
+                saveGame();
+                showNotification(`Слот ${slotNumber} разблокирован за ${starsNeeded} Stars!`);
+            } else {
+                showNotification('Оплата не завершена');
+            }
+        });
     } else {
-        showNotification(`Недостаточно монет! Нужно ${cost} монет.`);
+        showNotification('Донаты доступны только в Telegram');
     }
 }
 
@@ -681,7 +726,6 @@ function updateGardenSlotsUI() {
         
         if (slotData.unlocked) {
             if (slotData.tree) {
-                // Рассчитываем оставшееся время до гибели дерева
                 const timeLeft = CONSTANTS.TREE_DEATH_TIME - (Date.now() - slotData.lastWatered);
                 const daysLeft = Math.ceil(timeLeft / (24 * 60 * 60 * 1000));
                 
@@ -710,7 +754,7 @@ function updateGardenSlotsUI() {
             } else {
                 slotElement.innerHTML = `
                     <div class="empty-slot">+</div>
-                    <button class="btn btn-small plant-slot-btn">Посадить (0 монет)</button>
+                    <button class="btn btn-small plant-slot-btn">Посадить</button>
                 `;
                 const plantBtn = slotElement.querySelector('.plant-slot-btn');
                 if (plantBtn) {
@@ -723,12 +767,15 @@ function updateGardenSlotsUI() {
             slotElement.classList.add('locked');
             slotElement.innerHTML = `
                 <div class="empty-slot">🔒</div>
-                <button class="btn btn-small unlock-slot-btn">Разблокировать (${CONSTANTS.GARDEN_SLOT_COST} монет)</button>
+                <button class="btn btn-small unlock-slot-btn">
+                    Разблокировать (50 ⭐)
+                </button>
             `;
             const unlockBtn = slotElement.querySelector('.unlock-slot-btn');
             if (unlockBtn) {
-                unlockBtn.addEventListener('click', () => {
-                    unlockGardenSlot(slotNumber, CONSTANTS.GARDEN_SLOT_COST);
+                unlockBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    unlockGardenSlot(slotNumber);
                 });
             }
         }
