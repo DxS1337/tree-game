@@ -351,9 +351,16 @@ function setupEventListeners() {
     if (elements.gamepadNav) elements.gamepadNav.addEventListener('click', () => showContentSection('games-content'));
 
     // Skills
-    if (elements.upgradeExem) elements.upgradeExem.addEventListener('click', () => upgradeSkill('inventory', 'exemFasterMatch'));
-    if (elements.upgradeQuickHands) elements.upgradeQuickHands.addEventListener('click', () => upgradeSkill('inventory', 'quickHands'));
-    if (elements.upgradeOrganized) elements.upgradeOrganized.addEventListener('click', () => upgradeSkill('inventory', 'organized'));
+document.addEventListener('click', function(e) {
+    if (e.target.closest('#upgrade-exem')) {
+        upgradeSkill('inventory', 'exemFasterMatch');
+    }
+    if (e.target.closest('#upgrade-quick-hands')) {
+        upgradeSkill('inventory', 'quickHands');
+    }
+    if (e.target.closest('#upgrade-organized')) {
+        upgradeSkill('inventory', 'organized');
+    }
 
     // Admin panel
     if (elements.adminBtn) {
