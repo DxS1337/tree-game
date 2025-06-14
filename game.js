@@ -393,17 +393,6 @@ if (elements.chestMenuBtn) {
         });
     }
 
-    // Chests
-    if (elements.chestMenuBtn) {
-        elements.chestMenuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (elements.chestMenu) {
-                elements.chestMenu.classList.toggle('show');
-                updateChestTimer();
-            }
-        });
-    }
-
     // Games
     if (elements.game2048Card) elements.game2048Card.addEventListener('click', () => game2048.start());
     if (elements.game2048Restart) elements.game2048Restart.addEventListener('click', () => game2048.start());
