@@ -1,6 +1,6 @@
 'use strict';
 
-// Telegram WebApp initializatio
+// Telegram WebApp initialization
 let tg = {
     WebApp: {
         platform: 'unknown',
@@ -172,6 +172,7 @@ const elements = {
     game2048Score: document.getElementById('game-2048-score'),
     game2048Restart: document.getElementById('game-2048-restart'),
     game2048Close: document.getElementById('game-2048-close'),
+    inventoryPoints: document.getElementById('inventory-points')
 };
 
 console.log('elements:', elements);
@@ -228,7 +229,7 @@ function applyTheme() {
 }
 
 function initAchievements() {
-    if (!gameState.achievementsData) return;
+    if (!gameState.achievementsData || !gameState.profile?.achievements) return;
     gameState.achievementsData.forEach(ach => {
         ach.unlocked = gameState.profile.achievements.includes(ach.id);
     });
@@ -244,7 +245,7 @@ function initGame() {
     setupEventListeners();
     updateProgress(LOADING_STEPS.LISTENERS);
 
-        if (CONSTANTS.IS_TELEGRAM && tg?.WebApp) {
+    if (CONSTANTS.IS_TELEGRAM && tg?.WebApp) {
         CONSTANTS.SUPPORTS_STARS = tg.WebApp.isSupports('openInvoice');
     }
     
@@ -292,12 +293,12 @@ function initGame() {
 // Setup event listeners
 function setupEventListeners() {
     // Основные кнопки
-if (elements.waterBtn && typeof elements.waterBtn.addEventListener === 'function') {
-    elements.waterBtn.addEventListener('click', waterTree);
-}
-if (elements.plantBtn && typeof elements.plantBtn.addEventListener === 'function') {
-    elements.plantBtn.addEventListener('click', plantTree);
-}
+    if (elements.waterBtn && typeof elements.waterBtn.addEventListener === 'function') {
+        elements.waterBtn.addEventListener('click', waterTree);
+    }
+    if (elements.plantBtn && typeof elements.plantBtn.addEventListener === 'function') {
+        elements.plantBtn.addEventListener('click', plantTree);
+    }
 
     // Инициализация платежей Telegram
     if (CONSTANTS.IS_TELEGRAM && tg?.WebApp) {
@@ -321,28 +322,26 @@ if (elements.plantBtn && typeof elements.plantBtn.addEventListener === 'function
         });
     }
 
-    
-if (elements.chestMenu) {
-    const chestOptions = elements.chestMenu.querySelectorAll('.chest-option');
-    chestOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            const type = option.dataset.type;
-            openChest(type);
-            elements.chestMenu.classList.remove('show');
+    if (elements.chestMenu) {
+        const chestOptions = elements.chestMenu.querySelectorAll('.chest-option');
+        chestOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const type = option.dataset.type;
+                openChest(type);
+                elements.chestMenu.classList.remove('show');
+            });
         });
-    });
-}
+    }
 
-if (elements.chestMenuBtn) {
-    elements.chestMenuBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (elements.chestMenu) {
-            elements.chestMenu.classList.toggle('show');
-            updateChestTimer();
-        }
-    });
-}
-
+    if (elements.chestMenuBtn) {
+        elements.chestMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (elements.chestMenu) {
+                elements.chestMenu.classList.toggle('show');
+                updateChestTimer();
+            }
+        });
+    }
 
     // Навигация
     if (elements.skillsNav) elements.skillsNav.addEventListener('click', () => showContentSection('skills-content'));
@@ -665,32 +664,39 @@ function unlockGardenSlot(slotNumber) {
     const slot = gameState.gardenSlots[slotNumber];
     if (!slot) return;
 
-    // Проверяем, есть ли Telegram WebApp
-    if (CONSTANTS.IS_TELEGRAM && tg.WebApp) {
-        // Стоимость в Stars (например, 50 Stars за слот)
-        const starsNeeded = 50;
+    // Проверяем, есть ли Telegram WebApp и поддержка Stars
+    if (CONSTANTS.IS_TELEGRAM && tg.WebApp && CONSTANTS.SUPPORTS_STARS) {
+        const starsNeeded = CONSTANTS.GARDEN_SLOT_COST_STARS;
         
-        // Создаем платеж
-        const payment = {
-            id: 'slot_' + slotNumber + '_' + Date.now(),
-            title: 'Разблокировка слота для дерева',
-            description: 'Доступ к дополнительному слоту в саду',
-            currency: 'USD',
-            prices: [{ label: 'Stars', amount: starsNeeded * 100 }] // 1 Star = $0.01
-        };
-
-        // Открываем платежный интерфейс
-        tg.WebApp.openInvoice(payment, (status) => {
-            if (status === 'paid') {
-                // Платеж успешен
-                slot.unlocked = true;
-                updateGardenSlotsUI();
-                saveGame();
-                showNotification(`Слот ${slotNumber} разблокирован за ${starsNeeded} Stars!`);
-            } else {
-                showNotification('Оплата не завершена');
-            }
-        });
+        // Тестовый режим
+        if (tg.WebApp.initDataUnsafe?.start_param === 'test') {
+            slot.unlocked = true;
+            updateGardenSlotsUI();
+            saveGame();
+            showNotification(`[TEST] Слот ${slotNumber} разблокирован за ${starsNeeded} Stars!`);
+            return;
+        }
+        
+        try {
+            tg.WebApp.openInvoice({
+                title: `Разблокировка слота ${slotNumber}`,
+                description: 'Дополнительный слот для посадки деревьев',
+                currency: 'USD',
+                prices: [{ label: 'Stars', amount: starsNeeded * 100 }]
+            }, (status) => {
+                if (status === 'paid') {
+                    slot.unlocked = true;
+                    updateGardenSlotsUI();
+                    saveGame();
+                    showNotification(`Слот ${slotNumber} разблокирован за ${starsNeeded} Stars!`);
+                } else {
+                    showNotification('Оплата не завершена');
+                }
+            });
+        } catch (e) {
+            console.error('Ошибка платежа:', e);
+            showNotification('Ошибка при обработке платежа');
+        }
     } else {
         showNotification('Донаты доступны только в Telegram');
     }
@@ -755,7 +761,7 @@ function updateGardenSlotsUI() {
             slotElement.innerHTML = `
                 <div class="empty-slot">🔒</div>
                 <button class="btn btn-small unlock-slot-btn">
-                    Разблокировать (50 ⭐)
+                    Разблокировать (${CONSTANTS.GARDEN_SLOT_COST_STARS} ⭐)
                 </button>
             `;
             const unlockBtn = slotElement.querySelector('.unlock-slot-btn');
@@ -883,12 +889,9 @@ function updateUI() {
 
 function renderSkills() {
     // Обновляем счетчики очков
-    document.querySelectorAll('.skill-value').forEach(el => {
-        const category = el.id.replace('-points', '');
-        if (gameState.skills[category]) {
-            el.textContent = gameState.skills[category].points;
-        }
-    });
+    if (elements.inventoryPoints && gameState.skills.inventory) {
+        elements.inventoryPoints.textContent = gameState.skills.inventory.points;
+    }
 
     // Inventory skills
     const exemFasterMatch = gameState.skills.inventory.upgrades.exemFasterMatch;
@@ -1279,6 +1282,20 @@ function unlockAchievement(id) {
             // Обновляем интерфейс
             renderAchievements();
             saveGame();
+            
+            // Проверяем достижение "Садовник"
+            if (id === 'gardener') {
+                const allSlotsUnlocked = Object.values(gameState.gardenSlots).every(slot => slot.unlocked);
+                if (allSlotsUnlocked && !gameState.profile.achievements.includes('gardener')) {
+                    gameState.profile.achievements.push('gardener');
+                    const gardenerAchievement = gameState.achievementsData.find(a => a.id === 'gardener');
+                    if (gardenerAchievement) {
+                        gardenerAchievement.unlocked = true;
+                        showNotification(`Достижение разблокировано: ${gardenerAchievement.title}`);
+                        renderAchievements();
+                    }
+                }
+            }
         }
     }
 }
@@ -1378,6 +1395,7 @@ function loadGame() {
                 if (parsed.profile) {
                     gameState.profile.username = parsed.profile.username || CONSTANTS.DEFAULT_USERNAME;
                     gameState.profile.achievements = parsed.profile.achievements || [];
+                    gameState.profile.themeMode = parsed.profile.themeMode || 'auto';
                 }
                 
                 // Улучшения
@@ -1417,6 +1435,8 @@ function loadGame() {
                         ...ach,
                         unlocked: gameState.profile.achievements.includes(ach.id)
                     }));
+                } else {
+                    initAchievements();
                 }
             }
         }
@@ -1651,72 +1671,72 @@ const game2048 = {
         return false;
     },
 
-move(direction) {
-    if (!this.isPlaying) return false;
-    
-    const oldBoard = JSON.parse(JSON.stringify(this.board));
-    let scoreIncrease = 0;
-
-    switch(direction) {
-        case 'left':
-            for (let i = 0; i < 4; i++) {
-                const result = this.moveRow(this.board[i]);
-                this.board[i] = result.row;
-                scoreIncrease += result.score;
-            }
-            break;
-        case 'right':
-            for (let i = 0; i < 4; i++) {
-                const result = this.moveRow(this.board[i].reverse());
-                this.board[i] = result.row.reverse();
-                scoreIncrease += result.score;
-            }
-            break;
-        case 'up':
-            for (let j = 0; j < 4; j++) {
-                let column = [
-                    this.board[0][j], 
-                    this.board[1][j], 
-                    this.board[2][j], 
-                    this.board[3][j]
-                ];
-                const result = this.moveRow(column);
-                for (let i = 0; i < 4; i++) {
-                    this.board[i][j] = result.row[i];
-                }
-                scoreIncrease += result.score;
-            }
-            break;
-        case 'down':
-            for (let j = 0; j < 4; j++) {
-                let column = [
-                    this.board[3][j], 
-                    this.board[2][j], 
-                    this.board[1][j], 
-                    this.board[0][j]
-                ];
-                const result = this.moveRow(column);
-                for (let i = 0; i < 4; i++) {
-                    this.board[3-i][j] = result.row[i];
-                }
-                scoreIncrease += result.score;
-            }
-            break;
-    }
-
-    if (JSON.stringify(this.board) !== JSON.stringify(oldBoard)) {
-        if (scoreIncrease > 0) {
-            this.showScoreAnimation(scoreIncrease);
-        }
+    move(direction) {
+        if (!this.isPlaying) return false;
         
-        this.score += scoreIncrease;
-        this.addRandomTile();
-        this.updateUI();
-        this.checkGameStatus();
-        return true;
-    }
-    return false;
-}, 
+        const oldBoard = JSON.parse(JSON.stringify(this.board));
+        let scoreIncrease = 0;
+
+        switch(direction) {
+            case 'left':
+                for (let i = 0; i < 4; i++) {
+                    const result = this.moveRow(this.board[i]);
+                    this.board[i] = result.row;
+                    scoreIncrease += result.score;
+                }
+                break;
+            case 'right':
+                for (let i = 0; i < 4; i++) {
+                    const result = this.moveRow(this.board[i].reverse());
+                    this.board[i] = result.row.reverse();
+                    scoreIncrease += result.score;
+                }
+                break;
+            case 'up':
+                for (let j = 0; j < 4; j++) {
+                    let column = [
+                        this.board[0][j], 
+                        this.board[1][j], 
+                        this.board[2][j], 
+                        this.board[3][j]
+                    ];
+                    const result = this.moveRow(column);
+                    for (let i = 0; i < 4; i++) {
+                        this.board[i][j] = result.row[i];
+                    }
+                    scoreIncrease += result.score;
+                }
+                break;
+            case 'down':
+                for (let j = 0; j < 4; j++) {
+                    let column = [
+                        this.board[3][j], 
+                        this.board[2][j], 
+                        this.board[1][j], 
+                        this.board[0][j]
+                    ];
+                    const result = this.moveRow(column);
+                    for (let i = 0; i < 4; i++) {
+                        this.board[3-i][j] = result.row[i];
+                    }
+                    scoreIncrease += result.score;
+                }
+                break;
+        }
+
+        if (JSON.stringify(this.board) !== JSON.stringify(oldBoard)) {
+            if (scoreIncrease > 0) {
+                this.showScoreAnimation(scoreIncrease);
+            }
+            
+            this.score += scoreIncrease;
+            this.addRandomTile();
+            this.updateUI();
+            this.checkGameStatus();
+            return true;
+        }
+        return false;
+    }, 
 
     moveRow(row) {
         let newRow = row.filter(cell => cell !== 0);
