@@ -478,11 +478,11 @@ function setupEventListeners() {
         }
 
         const rewardBtn = elements.rewardModal.querySelector('.btn');
-        if (rewardBtn) {
-            rewardBtn.addEventListener('click', () => {
-                elements.rewardModal.style.display = 'none';
-            });
-        }
+    if (rewardBtn) {
+        rewardBtn.addEventListener('click', () => {
+            elements.rewardModal.style.display = 'none';
+        });
+    }
     
 
 // Показать секцию контента
@@ -1967,8 +1967,11 @@ const game2048 = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (elements.loadingScreen) {
-        elements.loadingScreen.style.display = 'flex';
+    if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+        tg = Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+        console.log('Telegram WebApp инициализирован, платформа:', tg.platform);
     }
     initGame();
 });
