@@ -477,11 +477,12 @@ function setupEventListeners() {
         }
 
         const rewardBtn = elements.rewardModal.querySelector('.btn');
-    if (rewardBtn) {
-        rewardBtn.addEventListener('click', () => {
-            elements.rewardModal.style.display = 'none';
-        });
-    }
+if (rewardBtn) {
+    rewardBtn.addEventListener('click', () => {
+        elements.rewardModal.style.display = 'none';
+    });
+} // ✅ Закрывающая скобка для условия if
+} // ✅ Закрывающая скобка для функции setupEventListeners()
     
 
 // Показать секцию контента
