@@ -408,11 +408,10 @@ function setupEventListeners() {
 
     // Profile
     if (elements.username) {
-        elements.username.addEventListener('change', function() {
-            gameState.profile.username = this.value || CONSTANTS.DEFAULT_USERNAME;
-            saveGame();
-        });
-    }
+    elements.username.addEventListener('change', function() {
+        gameState.profile.username = this.value.replace(/<[^>]*>?/gm, '').substring(0, 20) || CONSTANTS.DEFAULT_USERNAME;
+        saveGame();
+    });
 
     // Theme toggle
     const themeToggle = document.getElementById('theme-toggle');
