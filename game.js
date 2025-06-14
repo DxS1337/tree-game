@@ -112,7 +112,10 @@ const gameState = {
         { id: 'gardener', icon: '🌻', title: 'Садовник', description: 'Разблокируй все слоты сада.', unlocked: false },
         { id: 'expert', icon: '⭐', title: 'Эксперт', description: 'Достигни 10 уровня.', unlocked: false },
         { id: 'collector', icon: '🎁', title: 'Коллекционер', description: 'Открой все типы сундуков.', unlocked: false }
-    ]
+    ],
+    energyChanged: false,
+    coinsChanged: false,
+    openingChest: false
 };
 
 // DOM elements
@@ -172,7 +175,8 @@ const elements = {
     game2048Score: document.getElementById('game-2048-score'),
     game2048Restart: document.getElementById('game-2048-restart'),
     game2048Close: document.getElementById('game-2048-close'),
-    inventoryPoints: document.getElementById('inventory-points')
+    inventoryPoints: document.getElementById('inventory-points'),
+    themeToggle: document.getElementById('theme-toggle')
 };
 
 console.log('elements:', elements);
@@ -194,7 +198,7 @@ let currentProgress = 0;
 
 // Update loading progress
 function updateProgress(step) {
-    if (!elements.loadingScreen) return;
+    if (!elements.loadingScreen || !elements.loadingProgress) return;
     
     currentProgress += step;
     const progressPercent = Math.min(100, Math.floor(currentProgress));
@@ -204,9 +208,9 @@ function updateProgress(step) {
         setTimeout(() => {
             elements.loadingScreen.style.opacity = '0';
             setTimeout(() => {
-                elements.loadingScreen.style.display = 'none';
+                if (elements.loadingScreen) elements.loadingScreen.style.display = 'none';
                 document.body.classList.add('loaded');
-                elements.gameApp.classList.add('loaded');
+                if (elements.gameApp) elements.gameApp.classList.add('loaded');
             }, 500);
         }, 300);
     }
@@ -408,16 +412,16 @@ function setupEventListeners() {
 
     // Profile
     if (elements.username) {
-    elements.username.addEventListener('change', function() {
-        gameState.profile.username = this.value.replace(/<[^>]*>?/gm, '').substring(0, 20) || CONSTANTS.DEFAULT_USERNAME;
-        saveGame();
-    });
+        elements.username.addEventListener('change', function() {
+            gameState.profile.username = this.value.replace(/<[^>]*>?/gm, '').substring(0, 20) || CONSTANTS.DEFAULT_USERNAME;
+            saveGame();
+        });
+    }
 
     // Theme toggle
-    const themeToggle = document.getElementById('theme-toggle');
-    if (themeToggle) {
-        themeToggle.checked = (gameState.profile?.themeMode === 'dark');
-        themeToggle.addEventListener('change', function() {
+    if (elements.themeToggle) {
+        elements.themeToggle.checked = (gameState.profile?.themeMode === 'dark');
+        elements.themeToggle.addEventListener('change', function() {
             gameState.profile.themeMode = this.checked ? 'dark' : 'light';
             saveGame();
             applyTheme();
@@ -477,13 +481,13 @@ function setupEventListeners() {
         }
 
         const rewardBtn = elements.rewardModal.querySelector('.btn');
-if (rewardBtn) {
-    rewardBtn.addEventListener('click', () => {
-        elements.rewardModal.style.display = 'none';
-    });
-} // ✅ Закрывающая скобка для условия if
-} // ✅ Закрывающая скобка для функции setupEventListeners()
-    
+        if (rewardBtn) {
+            rewardBtn.addEventListener('click', () => {
+                elements.rewardModal.style.display = 'none';
+            });
+        }
+    }
+}
 
 // Показать секцию контента
 function showContentSection(sectionId) {
@@ -897,7 +901,7 @@ function updateUI() {
     if (elements.plantBtn) elements.plantBtn.disabled = gameState.energy < 2;
     
     // Обновление профиля
-    if (elements.username) {
+    if (elements.username && elements.username.value !== gameState.profile.username) {
         elements.username.value = gameState.profile.username;
     }
 }
@@ -1318,7 +1322,7 @@ function showNotification(text) {
 }
 
 function processNotificationQueue() {
-    if (notificationQueue.length === 0) {
+    if (!elements.notification || notificationQueue.length === 0) {
         isNotificationShowing = false;
         return;
     }
@@ -1359,96 +1363,94 @@ function loadGame() {
 
     try {
         const saveData = localStorage.getItem('tree-game-save');
-        if (saveData) {
-            const parsed = JSON.parse(saveData);
-            
-            // Восстановите profile, если он есть в сохранении
-            if (parsed.profile) {
-                gameState.profile = {
-                    ...gameState.profile,
-                    ...parsed.profile,
-                };
-            }
-            
-            if (parsed && typeof parsed === 'object') {
-                // Основные данные игры
-                gameState.level = parsed.level || 1;
-                gameState.xp = parsed.xp || 0;
-                gameState.energy = parsed.energy || 5;
-                gameState.maxEnergy = parsed.maxEnergy || 5;
-                gameState.coins = parsed.coins || 0;
-                gameState.target = parsed.target || 1;
-                gameState.planted = parsed.planted || 0;
-                gameState.nextLevelXP = parsed.nextLevelXP || 10;
-                gameState.activeTreeSlot = parsed.activeTreeSlot || null;
-                
-                // Слоты сада
-                if (parsed.gardenSlots) {
-                    for (const [slotNumber, slotData] of Object.entries(parsed.gardenSlots)) {
-                        if (gameState.gardenSlots[slotNumber]) {
-                            gameState.gardenSlots[slotNumber].unlocked = slotData.unlocked || false;
-                            gameState.gardenSlots[slotNumber].tree = slotData.tree || null;
-                            gameState.gardenSlots[slotNumber].lastWatered = slotData.lastWatered || null;
-                            gameState.gardenSlots[slotNumber].growthStage = slotData.growthStage || 0;
-                            gameState.gardenSlots[slotNumber].xp = slotData.xp || 0;
-                        }
-                    }
-                }
-                
-                // Профиль
-                if (parsed.profile) {
-                    gameState.profile.username = parsed.profile.username || CONSTANTS.DEFAULT_USERNAME;
-                    gameState.profile.achievements = parsed.profile.achievements || [];
-                    gameState.profile.themeMode = parsed.profile.themeMode || 'auto';
-                }
-                
-                // Улучшения
-                if (parsed.upgrades) {
-                    for (const key in gameState.upgrades) {
-                        if (parsed.upgrades[key]) {
-                            gameState.upgrades[key].currentLevel = parsed.upgrades[key].currentLevel || 0;
-                        }
-                    }
-                }
-                
-                // Навыки
-                if (parsed.skills) {
-                    for (const category in gameState.skills) {
-                        if (parsed.skills[category]) {
-                            gameState.skills[category].points = parsed.skills[category].points || 0;
-                            
-                            for (const skill in gameState.skills[category].upgrades) {
-                                if (parsed.skills[category].upgrades?.[skill]) {
-                                    gameState.skills[category].upgrades[skill].currentLevel = 
-                                        parsed.skills[category].upgrades[skill].currentLevel || 0;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Сундуки
-                if (parsed.chests) {
-                    gameState.chests.daily.lastOpened = parsed.chests.daily?.lastOpened || 0;
-                    gameState.chests.premium.pityCounter = parsed.chests.premium?.pityCounter || 0;
-                }
-                
-                // Достижения
-                if (parsed.achievementsData) {
-                    gameState.achievementsData = parsed.achievementsData.map(ach => ({
-                        ...ach,
-                        unlocked: gameState.profile.achievements.includes(ach.id)
-                    }));
-                } else {
-                    initAchievements();
+        if (!saveData) {
+            console.log('Нет сохраненных данных, начинаем новую игру');
+            return;
+        }
+        
+        const parsed = JSON.parse(saveData);
+        if (!parsed || typeof parsed !== 'object') {
+            throw new Error('Некорректные данные сохранения');
+        }
+        
+        // Восстановите profile, если он есть в сохранении
+        if (parsed.profile) {
+            gameState.profile = {
+                ...gameState.profile,
+                ...parsed.profile,
+            };
+        }
+        
+        // Основные данные игры
+        if (parsed.level) gameState.level = parsed.level;
+        if (parsed.xp) gameState.xp = parsed.xp;
+        if (parsed.energy) gameState.energy = parsed.energy;
+        if (parsed.maxEnergy) gameState.maxEnergy = parsed.maxEnergy;
+        if (parsed.coins) gameState.coins = parsed.coins;
+        if (parsed.target) gameState.target = parsed.target;
+        if (parsed.planted) gameState.planted = parsed.planted;
+        if (parsed.nextLevelXP) gameState.nextLevelXP = parsed.nextLevelXP;
+        if (parsed.activeTreeSlot) gameState.activeTreeSlot = parsed.activeTreeSlot;
+        
+        // Слоты сада
+        if (parsed.gardenSlots) {
+            for (const [slotNumber, slotData] of Object.entries(parsed.gardenSlots)) {
+                if (gameState.gardenSlots[slotNumber]) {
+                    gameState.gardenSlots[slotNumber].unlocked = slotData.unlocked || false;
+                    gameState.gardenSlots[slotNumber].tree = slotData.tree || null;
+                    gameState.gardenSlots[slotNumber].lastWatered = slotData.lastWatered || null;
+                    gameState.gardenSlots[slotNumber].growthStage = slotData.growthStage || 0;
+                    gameState.gardenSlots[slotNumber].xp = slotData.xp || 0;
                 }
             }
+        }
+        
+        // Улучшения
+        if (parsed.upgrades) {
+            for (const key in gameState.upgrades) {
+                if (parsed.upgrades[key]) {
+                    gameState.upgrades[key].currentLevel = parsed.upgrades[key].currentLevel || 0;
+                }
+            }
+        }
+        
+        // Навыки
+        if (parsed.skills) {
+            for (const category in gameState.skills) {
+                if (parsed.skills[category]) {
+                    gameState.skills[category].points = parsed.skills[category].points || 0;
+                    
+                    for (const skill in gameState.skills[category].upgrades) {
+                        if (parsed.skills[category].upgrades?.[skill]) {
+                            gameState.skills[category].upgrades[skill].currentLevel = 
+                                parsed.skills[category].upgrades[skill].currentLevel || 0;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Сундуки
+        if (parsed.chests) {
+            gameState.chests.daily.lastOpened = parsed.chests.daily?.lastOpened || 0;
+            gameState.chests.premium.pityCounter = parsed.chests.premium?.pityCounter || 0;
+        }
+        
+        // Достижения
+        if (parsed.achievementsData) {
+            gameState.achievementsData = parsed.achievementsData.map(ach => ({
+                ...ach,
+                unlocked: gameState.profile.achievements.includes(ach.id)
+            }));
+        } else {
+            initAchievements();
         }
     } catch (e) {
         console.error("Ошибка загрузки сохранения:", e);
         const backupName = 'tree-game-save-corrupted-' + Date.now();
         localStorage.setItem(backupName, localStorage.getItem('tree-game-save'));
         localStorage.removeItem('tree-game-save');
+        showNotification("Ошибка загрузки сохранения. Начинаем новую игру.");
     }
 }
 
@@ -1512,6 +1514,7 @@ function saveGame() {
             gameState.coinsChanged = false;
         } catch (e) {
             console.error("Ошибка сохранения:", e);
+            showNotification("Ошибка сохранения игры");
         }
     }
 }
@@ -1557,6 +1560,10 @@ const game2048 = {
     target: 2048,
     reachedTarget: false,
     victoryShown: false,
+    touchStartX: 0,
+    touchStartY: 0,
+    touchEndX: 0,
+    touchEndY: 0,
 
     init() {
         this.board = Array(4).fill().map(() => Array(4).fill(0));
@@ -1576,6 +1583,7 @@ const game2048 = {
     },
     
     handleTouchEnd(e) {
+        if (!this.touchStartX || !this.touchStartY) return;
         this.touchEndX = e.changedTouches[0].screenX;
         this.touchEndY = e.changedTouches[0].screenY;
         this.handleSwipe();
@@ -1947,31 +1955,8 @@ const game2048 = {
         }
         
         elements.game2048Score.textContent = `Счет: ${this.score} (Лучший: ${this.bestScore})`;
-    },
-
-    start() {
-        this.init();
-        if (elements.game2048Container) {
-            elements.game2048Container.style.display = 'block';
-        }
-    },
-
-    close() {
-        this.isPlaying = false;
-        if (elements.game2048Container) {
-            elements.game2048Container.style.display = 'none';
-        }
-        const victoryScreen = elements.game2048Container?.querySelector('.victory-screen');
-        if (victoryScreen) victoryScreen.remove();
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-        tg = Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
-        console.log('Telegram WebApp инициализирован, платформа:', tg.platform);
-    }
-    initGame();
-});
+// Initialize game when DOM is loaded
+document.addEventListener('DOMContentLoaded', initGame);
