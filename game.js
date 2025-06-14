@@ -1621,23 +1621,25 @@ move(direction) {
                     this.board[3][j]
                 ];
                 const result = this.moveRow(column);
-                column = result.row;
+                for (let i = 0; i < 4; i++) {
+                    this.board[i][j] = result.row[i];
+                }
                 scoreIncrease += result.score;
-                for (let i = 0; i < 4; i++) this.board[i][j] = column[i];
             }
             break;
         case 'down':
             for (let j = 0; j < 4; j++) {
                 let column = [
-                    this.board[0][j], 
-                    this.board[1][j], 
+                    this.board[3][j], 
                     this.board[2][j], 
-                    this.board[3][j]
-                ].reverse();
+                    this.board[1][j], 
+                    this.board[0][j]
+                ];
                 const result = this.moveRow(column);
-                column = result.row.reverse();
+                for (let i = 0; i < 4; i++) {
+                    this.board[3-i][j] = result.row[i];
+                }
                 scoreIncrease += result.score;
-                for (let i = 0; i < 4; i++) this.board[i][j] = column[i];
             }
             break;
     }
@@ -1654,8 +1656,7 @@ move(direction) {
         return true;
     }
     return false;
-},
- 
+}, 
 
     moveRow(row) {
         let newRow = row.filter(cell => cell !== 0);
