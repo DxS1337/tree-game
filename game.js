@@ -483,7 +483,7 @@ function setupEventListeners() {
                 elements.rewardModal.style.display = 'none';
             });
         }
-    }
+    
 
 // Показать секцию контента
 function showContentSection(sectionId) {
