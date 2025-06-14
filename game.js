@@ -1120,13 +1120,14 @@ function showRoulette(type) {
         // Рассчитываем позицию для остановки
         const containerWidth = rouletteModal.querySelector('.roulette-container').offsetWidth;
         const itemWidth = 80;
-        const centerOffset = containerWidth / 2 - itemWidth / 2;
+        const centerOffset = containerWidth / 2;
         const targetPosition = -(targetIndex * itemWidth) + centerOffset;
         
         // Запускаем анимацию
         setTimeout(() => {
+            // Вот здесь применяем новое преобразование с calc()
+            itemsContainer.style.transform = `translateX(calc(${targetPosition}px - 50%))`;
             itemsContainer.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.35, 1)';
-            itemsContainer.style.transform = `translateX(${targetPosition}px)`;
             
             setTimeout(() => {
                 const winningItem = itemsContainer.querySelector('[data-win="true"]');
@@ -1136,11 +1137,11 @@ function showRoulette(type) {
                     setTimeout(() => {
                         itemsContainer.style.transition = 'transform 0.2s';
                         setTimeout(() => {
-                            itemsContainer.style.transform = `translateX(${targetPosition + 5}px)`;
+                            itemsContainer.style.transform = `translateX(calc(${targetPosition + 5}px - 50%))`;
                             setTimeout(() => {
-                                itemsContainer.style.transform = `translateX(${targetPosition - 5}px)`;
+                                itemsContainer.style.transform = `translateX(calc(${targetPosition - 5}px - 50%))`;
                                 setTimeout(() => {
-                                    itemsContainer.style.transform = `translateX(${targetPosition}px)`;
+                                    itemsContainer.style.transform = `translateX(calc(${targetPosition}px - 50%))`;
                                     
                                     setTimeout(() => {
                                         rouletteModal.classList.remove('show');
@@ -1158,7 +1159,6 @@ function showRoulette(type) {
         }, 100);
     });
 }
-
 function getChestReward(chestType) {
     const chest = gameState.chests[chestType];
     
