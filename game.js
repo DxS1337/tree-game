@@ -41,7 +41,6 @@ const CONSTANTS = {
     VIEWPORT_HEIGHT: tg?.WebApp?.viewportHeight || window.innerHeight,
     GARDEN_SLOT_COST_STARS: 50, // Стоимость разблокировки слота в Stars
     SUPPORTS_STARS: false // Будет установлено при инициализации
-
 };
 
 // Game state
