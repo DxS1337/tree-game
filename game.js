@@ -992,11 +992,19 @@ function buyUpgrade(upgradeKey) {
 }
 
 function renderShop() {
-    if (!elements.shopItems) return;
+    console.log("Render Shop Called"); // Отладочное сообщение
+    console.log("Upgrades data:", gameState.upgrades); // Проверяем данные
+    
+    if (!elements.shopItems) {
+        console.error("Shop items element not found!");
+        return;
+    }
     
     elements.shopItems.innerHTML = '';
     
     for (const [key, upgrade] of Object.entries(gameState.upgrades)) {
+        console.log(`Processing upgrade: ${key}`); // Отладка каждого улучшения
+        
         const item = document.createElement('div');
         item.className = 'shop-item';
         item.innerHTML = `
@@ -1018,6 +1026,8 @@ function renderShop() {
         
         elements.shopItems.appendChild(item);
     }
+    
+    console.log("Shop rendered successfully"); // Подтверждение успешного рендеринга
 }
 
 // Сундуки
