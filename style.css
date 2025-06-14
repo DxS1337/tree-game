@@ -1344,11 +1344,20 @@ body {
 
 .dark-theme .achievement-card {
     background-color: #424242;
+    color: white;
 }
 
+.dark-theme .skill-item {
+    background-color: #424242;
+    color: white;
+}
 .achievement-card.locked {
     opacity: 0.7;
     border-left-color: #ccc;
+}
+
+.tree, .roulette-item, .btn {
+    will-change: transform, opacity;
 }
 
 .achievement-card .icon {
