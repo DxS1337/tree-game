@@ -484,7 +484,6 @@ function setupEventListeners() {
             });
         }
     }
-}
 
 // Показать секцию контента
 function showContentSection(sectionId) {
