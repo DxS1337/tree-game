@@ -895,16 +895,19 @@ body {
     background: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
-    align-items: center; /* Это центрирует по вертикали */
+    align-items: center;
     z-index: 1001;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s, visibility 0.3s;
+    /* Добавьте это, чтобы модальное окно было поверх всех элементов */
+    pointer-events: none;
 }
 
 .reward-modal.show {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
 }
 
 .reward-modal .modal-content {
@@ -915,9 +918,11 @@ body {
     max-width: 300px;
     position: relative;
     text-align: center;
-    transform: translateY(0); /* Убедитесь, что нет трансформации сдвига */
+    /* Уберите transform, если он был */
+    margin: 0;
+    /* Добавьте небольшой отступ сверху для лучшего визуального баланса */
+    margin-top: -20px;
 }
-
 .reward-emoji {
     font-size: 3rem;
     margin-bottom: 15px;
