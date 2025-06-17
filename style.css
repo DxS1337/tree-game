@@ -895,7 +895,7 @@ body {
     background: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: center; /* Это центрирует по вертикали */
     z-index: 1001;
     opacity: 0;
     visibility: hidden;
@@ -915,7 +915,7 @@ body {
     max-width: 300px;
     position: relative;
     text-align: center;
-    margin: 0 auto; /* Добавьте это для дополнительного центрирования */
+    transform: translateY(0); /* Убедитесь, что нет трансформации сдвига */
 }
 
 .reward-emoji {
