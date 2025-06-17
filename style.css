@@ -915,6 +915,7 @@ body {
     max-width: 300px;
     position: relative;
     text-align: center;
+    margin: 0 auto; /* Добавьте это для дополнительного центрирования */
 }
 
 .reward-emoji {
