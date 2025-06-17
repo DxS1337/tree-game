@@ -1091,7 +1091,7 @@ function showRoulette(type) {
         rouletteModal.innerHTML = `
             <div class="modal-content">
                 <span class="close">&times;</span>
-                <div class="roulette-title">🎰 Рулетка сундука</div>
+                <div class="roulette-title">🎰 Рулетка</div>
                 <div class="roulette-wrapper">
                     <div class="roulette-container">
                         <div class="roulette-items"></div>
