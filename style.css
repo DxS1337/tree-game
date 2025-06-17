@@ -890,30 +890,33 @@ body {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
     z-index: 1001;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s, visibility 0.3s;
     pointer-events: none;
 }
+
 .reward-modal.show {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
 }
+
 .reward-modal .modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background: var(--card-color);
     border-radius: 16px;
     padding: 20px;
     width: 90%;
     max-width: 300px;
-    position: relative;
     text-align: center;
     margin: 0;
-}.reward-emoji {
+}
+.reward-emoji {
     font-size: 3rem;
     margin-bottom: 15px;
 }
