@@ -886,6 +886,7 @@ body {
 }
 
 /* Reward modal styles */
+/* Вырезка для патча — замените существующие стили reward-modal на эти */
 .reward-modal {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
