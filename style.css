@@ -888,10 +888,7 @@ body {
 /* Reward modal styles */
 .reward-modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
@@ -900,19 +897,13 @@ body {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s, visibility 0.3s;
-    /* Добавьте это, чтобы модальное окно было поверх всех элементов */
     pointer-events: none;
-    transform: none !important;
-    top: 0 !important;
-    margin: 0 !important;
 }
-
 .reward-modal.show {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
 }
-
 .reward-modal .modal-content {
     background: var(--card-color);
     border-radius: 16px;
@@ -921,12 +912,8 @@ body {
     max-width: 300px;
     position: relative;
     text-align: center;
-    /* Уберите transform, если он был */
     margin: 0;
-    /* Добавьте небольшой отступ сверху для лучшего визуального баланса */
-    margin-top: -20px;
-}
-.reward-emoji {
+}.reward-emoji {
     font-size: 3rem;
     margin-bottom: 15px;
 }
