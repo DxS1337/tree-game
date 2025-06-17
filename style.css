@@ -902,6 +902,9 @@ body {
     transition: opacity 0.3s, visibility 0.3s;
     /* Добавьте это, чтобы модальное окно было поверх всех элементов */
     pointer-events: none;
+    transform: none !important;
+    top: 0 !important;
+    margin: 0 !important;
 }
 
 .reward-modal.show {
